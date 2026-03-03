@@ -2,7 +2,7 @@
 
 **The missing link between Supabase and SQLite for Flutter apps.**
 
-Turn your online-only Supabase app into a robust Offline-First application. flutter_local_first handles the complexity of data synchronization, conflict resolution, difference tracking, and local caching, so you can focus on building your UI.
+Turn your online-only Supabase app into a robust Offline-First application. replicore handles the complexity of data synchronization, conflict resolution, difference tracking, and local caching, so you can focus on building your UI.
 
 It connects your existing sqflite database with your supabase_flutter project using a fluent, easy-to-use API.
 
@@ -34,7 +34,7 @@ Note: You do NOT need to add is_synced to Supabase. This is a local-only column 
 
 Add the dependencies to your code with running:
 
-flutter pub add flutter_local_first
+flutter pub add replicore
 
 ## 🏁 Getting Started
 
@@ -43,7 +43,7 @@ flutter pub add flutter_local_first
 Initialize the service once (e.g., in your main.dart or a provider) by passing your Database instance and defining the tables you want to sync.
 
 ```dart
-import 'package:flutter_local_first/flutter_local_first.dart';
+import 'package:replicore/replicore.dart';
 
 void main() async {
   // 1. Open your SQLite database
@@ -132,7 +132,7 @@ StreamBuilder<String>(
 
 ### 🧩 Conflict Strategies
 
-When a record has been modified both locally (offline) and remotely (server), a conflict occurs. flutter_local_first offers 4 strategies to handle this:
+When a record has been modified both locally (offline) and remotely (server), a conflict occurs. replicore offers 4 strategies to handle this:
 
 Strategy
 

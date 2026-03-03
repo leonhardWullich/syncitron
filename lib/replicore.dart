@@ -1,4 +1,15 @@
-import 'dart:async';
+export 'src/core/sync_engine.dart';
+export 'src/core/sync_strategy.dart';
+export 'src/core/models.dart';
+export 'src/core/table_config.dart';
+
+export 'src/adapters/remote_adapter.dart';
+export 'src/adapters/supabase_adapter.dart';
+
+export 'src/storage/local_store.dart';
+export 'src/storage/sqflite_store.dart';
+
+/*import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supa;
@@ -305,7 +316,7 @@ class FlutterLocalFirst {
     _statusController.add("Syncing: $tableName");
 
     // Load last sync timestamp using internal _prefs
-    final lastSyncKey = 'flutter_local_first_last_$tableName';
+    final lastSyncKey = 'replicore_last_$tableName';
     final lastSyncStr = _prefs!.getString(lastSyncKey);
     final lastSync = lastSyncStr != null ? DateTime.parse(lastSyncStr) : null;
     final now = DateTime.now().toUtc();
@@ -581,4 +592,4 @@ class _ColumnConfig {
   final String type;
   final String defaultValue;
   _ColumnConfig(this.name, this.type, this.defaultValue);
-}
+}*/

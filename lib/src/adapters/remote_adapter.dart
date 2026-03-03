@@ -1,0 +1,16 @@
+import '../core/models.dart';
+
+abstract class RemoteAdapter {
+  Future<PullResult> pull(PullRequest request);
+
+  Future<void> upsert({
+    required String table,
+    required Map<String, dynamic> data,
+  });
+
+  Future<void> softDelete({
+    required String table,
+    required dynamic id,
+    required Map<String, dynamic> payload,
+  });
+}

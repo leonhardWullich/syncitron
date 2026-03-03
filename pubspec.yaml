@@ -1,7 +1,7 @@
-name: flutter_local_first
-description: Locl-first synchronization between Supabase and SQLite.
-version: 0.0.1
-homepage: https://github.com/leonhardWullich/flutter_local_first
+name: replicore
+description: A pluggable local-first synchronization engine for Flutter.
+version: 0.1.0
+homepage: https://github.com/leonhardWullich/replicore
 
 environment:
   sdk: ^3.10.8
@@ -12,7 +12,6 @@ dependencies:
     sdk: flutter
   sqflite: ^2.4.2
   supabase_flutter: ^2.12.0 
-  shared_preferences: ^2.5.4
   connectivity_plus: ^7.0.0
 
 dev_dependencies:
