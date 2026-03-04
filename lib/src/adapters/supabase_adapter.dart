@@ -24,14 +24,25 @@ class SupabaseAdapter implements RemoteAdapter {
 
     final effectiveCursor = request.cursor ?? persistedCursor;
 
-    var queryBuilder = client.from(request.table).select(request.columns.join(','));
+    var queryBuilder = client
+        .from(request.table)
+        .select(request.columns.join(','));
 
     if (effectiveCursor != null) {
       final cursorTs = effectiveCursor.updatedAt.toUtc().toIso8601String();
-      final pkFilterValue = _toFilterLiteral(effectiveCursor.primaryKey);
-      queryBuilder = queryBuilder.or(
-        '${request.updatedAtColumn}.gt.$cursorTs,and(${request.updatedAtColumn}.eq.$cursorTs,${request.primaryKey}.gt.$pkFilterValue)',
-      );
+
+      // Only apply keyset pagination when we have a valid primary key.
+      // A null primary key means "fetch everything updated after cursorTs".
+      if (effectiveCursor.primaryKey != null) {
+        final pkFilterValue = _toFilterLiteral(effectiveCursor.primaryKey);
+        queryBuilder = queryBuilder.or(
+          '${request.updatedAtColumn}.gt.$cursorTs,'
+          'and(${request.updatedAtColumn}.eq.$cursorTs,'
+          '${request.primaryKey}.gt.$pkFilterValue)',
+        );
+      } else {
+        queryBuilder = queryBuilder.gt(request.updatedAtColumn, cursorTs);
+      }
     }
 
     final batchData = await queryBuilder
@@ -42,17 +53,23 @@ class SupabaseAdapter implements RemoteAdapter {
     final records = List<Map<String, dynamic>>.from(batchData);
 
     SyncCursor? nextCursor;
+
     if (records.isNotEmpty) {
       final latestRecord = records.last;
       nextCursor = SyncCursor(
-        updatedAt: DateTime.parse(latestRecord[request.updatedAtColumn].toString()),
+        updatedAt: DateTime.parse(
+          latestRecord[request.updatedAtColumn].toString(),
+        ),
         primaryKey: latestRecord[request.primaryKey],
       );
 
-      if (records.length < request.limit) {
-        await prefs.setString(lastSyncKey, jsonEncode(nextCursor.toJson()));
-      }
+      // FIX: Persist the cursor after EVERY batch, not only the last one.
+      // Without this, an interrupted sync would restart from the beginning
+      // on the next run instead of continuing from where it left off.
+      await prefs.setString(lastSyncKey, jsonEncode(nextCursor.toJson()));
     } else if (request.cursor == null && persistedCursor == null) {
+      // First ever sync returned nothing — record a "synced up to now" marker
+      // so future syncs can use incremental deltas.
       await prefs.setString(
         lastSyncKey,
         jsonEncode(
@@ -66,18 +83,18 @@ class SupabaseAdapter implements RemoteAdapter {
 
     return PullResult(
       records: records,
+      // Signal "no more pages" when we received fewer records than the limit.
       nextCursor: records.length == request.limit ? nextCursor : null,
     );
   }
+
+  // ── Helpers ────────────────────────────────────────────────────────────────
 
   SyncCursor? _readCursor(String key) {
     final value = prefs.getString(key);
     if (value == null || value.isEmpty) return null;
     try {
       final decoded = jsonDecode(value);
-      if (decoded is Map<String, dynamic>) {
-        return SyncCursor.fromJson(decoded);
-      }
       if (decoded is Map) {
         return SyncCursor.fromJson(Map<String, dynamic>.from(decoded));
       }
@@ -93,6 +110,8 @@ class SupabaseAdapter implements RemoteAdapter {
     final escaped = value.toString().replaceAll('"', '\\"');
     return '"$escaped"';
   }
+
+  // ── Write operations ───────────────────────────────────────────────────────
 
   @override
   Future<void> upsert({

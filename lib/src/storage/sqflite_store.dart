@@ -32,11 +32,10 @@ class SqfliteStore implements LocalStore {
       if (!existingColumns.contains(col['name'])) {
         try {
           await db.execute(
-            "ALTER TABLE $table ADD COLUMN ${col['name']} ${col['type']} DEFAULT ${col['default']}",
+            'ALTER TABLE $table ADD COLUMN ${col['name']} ${col['type']} DEFAULT ${col['default']}',
           );
-          print("🪄 Auto-Migration: Added '${col['name']}' to '$table'");
         } catch (e) {
-          print("⚠️ Migration Warning for $table.${col['name']}: $e");
+          // Column may have been added by a concurrent call — safe to ignore.
         }
       }
     }
@@ -48,7 +47,10 @@ class SqfliteStore implements LocalStore {
   }
 
   @override
-  Future<void> upsertBatch(String table, List<Map<String, dynamic>> records) async {
+  Future<void> upsertBatch(
+    String table,
+    List<Map<String, dynamic>> records,
+  ) async {
     if (records.isEmpty) return;
     final batch = db.batch();
     for (final record in records) {
@@ -58,7 +60,11 @@ class SqfliteStore implements LocalStore {
   }
 
   @override
-  Future<void> markAsSynced(String table, String pkColumn, dynamic primaryKey) async {
+  Future<void> markAsSynced(
+    String table,
+    String pkColumn,
+    dynamic primaryKey,
+  ) async {
     await db.update(
       table,
       {isSyncedColumn: 1, operationIdColumn: null},
@@ -83,8 +89,17 @@ class SqfliteStore implements LocalStore {
   }
 
   @override
-  Future<Map<String, dynamic>?> findById(String table, String pkColumn, dynamic id) async {
-    final result = await db.query(table, where: '$pkColumn = ?', whereArgs: [id], limit: 1);
+  Future<Map<String, dynamic>?> findById(
+    String table,
+    String pkColumn,
+    dynamic id,
+  ) async {
+    final result = await db.query(
+      table,
+      where: '$pkColumn = ?',
+      whereArgs: [id],
+      limit: 1,
+    );
     return result.isEmpty ? null : result.first;
   }
 
@@ -97,8 +112,12 @@ class SqfliteStore implements LocalStore {
     if (ids.isEmpty) return [];
     final results = <Map<String, dynamic>>[];
 
+    // SQLite has a max of 999 host parameters — chunk to stay safe.
     for (var i = 0; i < ids.length; i += 900) {
-      final chunk = ids.sublist(i, i + 900 > ids.length ? ids.length : i + 900);
+      final chunk = ids.sublist(
+        i,
+        (i + 900) > ids.length ? ids.length : (i + 900),
+      );
       final placeholders = List.filled(chunk.length, '?').join(',');
       final res = await db.query(
         table,

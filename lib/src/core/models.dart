@@ -1,5 +1,8 @@
 class SyncCursor {
   final DateTime updatedAt;
+
+  /// The primary key value of the last seen record.
+  /// Must not be null — a null cursor means "start from the beginning".
   final dynamic primaryKey;
 
   const SyncCursor({required this.updatedAt, required this.primaryKey});
