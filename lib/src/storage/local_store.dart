@@ -11,6 +11,13 @@ abstract class LocalStore {
 
   Future<void> markAsSynced(String table, String pkColumn, dynamic primaryKey);
 
+  Future<void> setOperationId(
+    String table,
+    String pkColumn,
+    dynamic primaryKey,
+    String operationId,
+  );
+
   Future<Map<String, dynamic>?> findById(
     String table,
     String pkColumn,

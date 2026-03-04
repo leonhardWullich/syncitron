@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
 import '../core/models.dart';
 import 'remote_adapter.dart';
 
@@ -14,74 +17,88 @@ class SupabaseAdapter implements RemoteAdapter {
     this.updatedAtColumn = 'updated_at',
   });
 
+  @override
   Future<PullResult> pull(PullRequest request) async {
-    final lastSyncKey = 'replicore_last_${request.table}';
-    final lastSyncStr = prefs.getString(lastSyncKey);
-    final lastSync = lastSyncStr != null ? DateTime.parse(lastSyncStr) : null;
+    final lastSyncKey = 'replicore_cursor_${request.table}';
+    final persistedCursor = _readCursor(lastSyncKey);
 
-    var queryBuilder = client
-        .from(request.table)
-        .select(request.columns.join(','));
+    final effectiveCursor = request.cursor ?? persistedCursor;
 
-    // Cursor-Paginierung: Lade nur Datensätze, die NEUER sind als der Cursor.
-    // Wenn kein Cursor da ist (erster Durchlauf), nimm den lastSync der ganzen Tabelle.
-    if (request.cursor != null) {
-      queryBuilder = queryBuilder.gt(
-        updatedAtColumn,
-        request.cursor!.updatedAt.toIso8601String(),
-      );
-    } else if (lastSync != null) {
-      queryBuilder = queryBuilder.gt(
-        updatedAtColumn,
-        lastSync.toIso8601String(),
+    var queryBuilder = client.from(request.table).select(request.columns.join(','));
+
+    if (effectiveCursor != null) {
+      final cursorTs = effectiveCursor.updatedAt.toUtc().toIso8601String();
+      final pkFilterValue = _toFilterLiteral(effectiveCursor.primaryKey);
+      queryBuilder = queryBuilder.or(
+        '${request.updatedAtColumn}.gt.$cursorTs,and(${request.updatedAtColumn}.eq.$cursorTs,${request.primaryKey}.gt.$pkFilterValue)',
       );
     }
 
-    // Lade genau EINEN Batch, geordnet nach Zeitstempel
     final batchData = await queryBuilder
-        .order(updatedAtColumn, ascending: true)
-        // Wir limitieren strikt auf die angefragte Batch-Size
+        .order(request.updatedAtColumn, ascending: true)
+        .order(request.primaryKey, ascending: true)
         .limit(request.limit);
 
     final records = List<Map<String, dynamic>>.from(batchData);
 
     SyncCursor? nextCursor;
-
     if (records.isNotEmpty) {
-      // Der Cursor für die nächste Anfrage ist der Zeitstempel des LETZTEN Datensatzes
       final latestRecord = records.last;
       nextCursor = SyncCursor(
-        updatedAt: DateTime.parse(latestRecord[updatedAtColumn]),
-        primaryKey:
-            latestRecord['id'], // Info: Bei dynamischem PK müsste man hier request.primaryKey übergeben!
+        updatedAt: DateTime.parse(latestRecord[request.updatedAtColumn].toString()),
+        primaryKey: latestRecord[request.primaryKey],
       );
 
-      // Wenn dies der letzte Batch war (wir haben weniger bekommen als angefragt),
-      // merken wir uns den finalen Zeitstempel für den nächsten App-Start.
       if (records.length < request.limit) {
-        await prefs.setString(lastSyncKey, latestRecord[updatedAtColumn]);
+        await prefs.setString(lastSyncKey, jsonEncode(nextCursor.toJson()));
       }
-    } else if (request.cursor == null) {
-      // Fallback: Es gab gar keine neuen Daten. Timestamp aktualisieren, damit
-      // wir wissen, dass ein erfolgreicher Sync-Check stattgefunden hat.
+    } else if (request.cursor == null && persistedCursor == null) {
       await prefs.setString(
         lastSyncKey,
-        DateTime.now().toUtc().toIso8601String(),
+        jsonEncode(
+          SyncCursor(
+            updatedAt: DateTime.now().toUtc(),
+            primaryKey: null,
+          ).toJson(),
+        ),
       );
     }
 
     return PullResult(
       records: records,
-      nextCursor: records.length == request.limit
-          ? nextCursor
-          : null, // Nur einen nextCursor liefern, wenn es noch mehr geben könnte
+      nextCursor: records.length == request.limit ? nextCursor : null,
     );
+  }
+
+  SyncCursor? _readCursor(String key) {
+    final value = prefs.getString(key);
+    if (value == null || value.isEmpty) return null;
+    try {
+      final decoded = jsonDecode(value);
+      if (decoded is Map<String, dynamic>) {
+        return SyncCursor.fromJson(decoded);
+      }
+      if (decoded is Map) {
+        return SyncCursor.fromJson(Map<String, dynamic>.from(decoded));
+      }
+    } catch (_) {
+      return null;
+    }
+    return null;
+  }
+
+  String _toFilterLiteral(dynamic value) {
+    if (value is num) return value.toString();
+    if (value == null) return 'null';
+    final escaped = value.toString().replaceAll('"', '\\"');
+    return '"$escaped"';
   }
 
   @override
   Future<void> upsert({
     required String table,
     required Map<String, dynamic> data,
+    String? idempotencyKey,
   }) async {
     await client.from(table).upsert(data);
   }
@@ -89,9 +106,11 @@ class SupabaseAdapter implements RemoteAdapter {
   @override
   Future<void> softDelete({
     required String table,
+    required String primaryKeyColumn,
     required dynamic id,
     required Map<String, dynamic> payload,
+    String? idempotencyKey,
   }) async {
-    await client.from(table).update(payload).eq('id', id);
+    await client.from(table).update(payload).eq(primaryKeyColumn, id);
   }
 }

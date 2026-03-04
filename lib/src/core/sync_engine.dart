@@ -1,15 +1,18 @@
 import 'dart:async';
+
 import '../adapters/remote_adapter.dart';
 import '../storage/local_store.dart';
 import '../utils/retry.dart';
 import 'models.dart';
-import 'table_config.dart';
 import 'sync_strategy.dart';
+import 'table_config.dart';
 
 class SyncEngine {
   final LocalStore localStore;
   final RemoteAdapter remoteAdapter;
   final int batchSize;
+  final String isSyncedColumn;
+  final String operationIdColumn;
 
   final List<TableConfig> _tables = [];
 
@@ -22,6 +25,8 @@ class SyncEngine {
     required this.localStore,
     required this.remoteAdapter,
     this.batchSize = 500,
+    this.isSyncedColumn = 'is_synced',
+    this.operationIdColumn = 'op_id',
   });
 
   Future<void> init() async {
@@ -86,6 +91,8 @@ class SyncEngine {
           PullRequest(
             table: config.name,
             columns: config.columns,
+            primaryKey: config.primaryKey,
+            updatedAtColumn: config.updatedAtColumn,
             cursor: cursor,
             limit: batchSize,
           ),
@@ -108,12 +115,14 @@ class SyncEngine {
       );
 
       final localRecordsMap = {
-        for (var row in localRecords) row[config.primaryKey].toString(): row,
+        for (final row in localRecords) row[config.primaryKey].toString(): row,
       };
 
       for (final remote in result.records) {
-        final idKey = remote[config.primaryKey].toString();
-        final local = localRecordsMap[idKey];
+        final idValue = remote[config.primaryKey];
+        if (idValue == null) continue;
+
+        final local = localRecordsMap[idValue.toString()];
 
         if (local == null) {
           merged.add(remote);
@@ -138,9 +147,7 @@ class SyncEngine {
     final dirty = await localStore.queryDirty(config.name);
 
     if (dirty.isNotEmpty) {
-      _statusController.add(
-        'Uploading ${dirty.length} changes for ${config.name}...',
-      );
+      _statusController.add('Uploading ${dirty.length} changes for ${config.name}...');
     }
 
     for (final row in dirty) {
@@ -148,8 +155,18 @@ class SyncEngine {
         final pkValue = row[config.primaryKey];
         if (pkValue == null) continue;
 
-        final uploadData = Map<String, dynamic>.from(row);
-        uploadData.remove('is_synced');
+        var operationId = row[operationIdColumn]?.toString();
+        operationId ??= _buildOperationId(config, row);
+        await localStore.setOperationId(
+          config.name,
+          config.primaryKey,
+          pkValue,
+          operationId,
+        );
+
+        final uploadData = Map<String, dynamic>.from(row)
+          ..remove(isSyncedColumn)
+          ..remove(operationIdColumn);
 
         final isSoftDeleted = row[config.deletedAtColumn] != null;
 
@@ -157,26 +174,36 @@ class SyncEngine {
           if (isSoftDeleted) {
             await remoteAdapter.softDelete(
               table: config.name,
+              primaryKeyColumn: config.primaryKey,
               id: pkValue,
               payload: {
                 config.deletedAtColumn: row[config.deletedAtColumn],
-                config.updatedAtColumn:
-                    row[config.updatedAtColumn] ??
+                config.updatedAtColumn: row[config.updatedAtColumn] ??
                     DateTime.now().toUtc().toIso8601String(),
               },
+              idempotencyKey: operationId,
             );
           } else {
-            await remoteAdapter.upsert(table: config.name, data: uploadData);
+            await remoteAdapter.upsert(
+              table: config.name,
+              data: uploadData,
+              idempotencyKey: operationId,
+            );
           }
         });
 
         await localStore.markAsSynced(config.name, config.primaryKey, pkValue);
       } catch (e) {
-        print(
-          '⚠️ Sync Push failed for ${config.name} (ID: ${row[config.primaryKey]}): $e',
-        );
+        print('⚠️ Sync Push failed for ${config.name} (ID: ${row[config.primaryKey]}): $e');
       }
     }
+  }
+
+  String _buildOperationId(TableConfig config, Map<String, dynamic> row) {
+    final pk = row[config.primaryKey]?.toString() ?? 'unknown';
+    final updatedAt = row[config.updatedAtColumn]?.toString() ?? '';
+    final deletedAt = row[config.deletedAtColumn]?.toString() ?? '';
+    return '${config.name}:$pk:$updatedAt:$deletedAt';
   }
 
   Future<Map<String, dynamic>?> _resolveConflict(
@@ -184,31 +211,30 @@ class SyncEngine {
     Map<String, dynamic> local,
     Map<String, dynamic> remote,
   ) async {
+    final localDirty = local[isSyncedColumn] == 0 || local[isSyncedColumn] == false;
+    if (!localDirty) {
+      return remote;
+    }
+
     switch (config.strategy) {
       case SyncStrategy.serverWins:
         return remote;
-
       case SyncStrategy.localWins:
         return null;
-
       case SyncStrategy.lastWriteWins:
         final localDateStr = local[config.updatedAtColumn]?.toString();
         final remoteDateStr = remote[config.updatedAtColumn]?.toString();
 
-        final localDate = localDateStr != null
-            ? DateTime.tryParse(localDateStr)
-            : null;
-        final remoteDate = remoteDateStr != null
-            ? DateTime.tryParse(remoteDateStr)
-            : null;
+        final localDate = localDateStr != null ? DateTime.tryParse(localDateStr) : null;
+        final remoteDate = remoteDateStr != null ? DateTime.tryParse(remoteDateStr) : null;
 
-        if (remoteDate != null &&
-            localDate != null &&
-            remoteDate.isAfter(localDate)) {
+        if (remoteDate == null) return null;
+        if (localDate == null) return remote;
+
+        if (remoteDate.isAfter(localDate)) {
           return remote;
         }
         return null;
-
       case SyncStrategy.custom:
         if (config.customResolver != null) {
           return config.customResolver!(local, remote);
