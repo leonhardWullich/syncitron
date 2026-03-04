@@ -53,11 +53,26 @@ class SyncEngine {
 
       final merged = <Map<String, dynamic>>[];
 
+      // OPTIMIERUNG: N+1 Problem behoben! Alle lokalen Datensätze auf einmal laden.
+      final remoteIds = result.records
+          .map((r) => r[config.primaryKey])
+          .where((id) => id != null)
+          .toList();
+
+      final localRecords = await localStore.findManyByIds(
+        config.name,
+        config.primaryKey,
+        remoteIds,
+      );
+
+      // Für schnellen Lookup als Map konvertieren
+      final localRecordsMap = {
+        for (var row in localRecords) row[config.primaryKey].toString(): row,
+      };
+
       for (final remote in result.records) {
-        final local = await localStore.findById(
-          config.name,
-          remote[config.primaryKey],
-        );
+        final idKey = remote[config.primaryKey].toString();
+        final local = localRecordsMap[idKey];
 
         if (local == null) {
           merged.add(remote);
@@ -82,11 +97,44 @@ class SyncEngine {
     final dirty = await localStore.queryDirty(config.name);
 
     for (final row in dirty) {
-      await retry(() {
-        return remoteAdapter.upsert(table: config.name, data: row);
-      });
+      // FEHLERTOLERANZ: Fehler eines Datensatzes crasht nicht den ganzen Sync
+      try {
+        final pkValue = row[config.primaryKey];
+        if (pkValue == null) continue;
 
-      await localStore.markAsSynced(config.name, row[config.primaryKey]);
+        // Kopie erstellen und lokale Hilfsspalten entfernen, die nicht zum Server sollen
+        final uploadData = Map<String, dynamic>.from(row);
+        uploadData.remove('is_synced');
+
+        final isSoftDeleted = row[config.deletedAtColumn] != null;
+
+        await retry(() async {
+          if (isSoftDeleted) {
+            // SOFT DELETE SUPPORT
+            await remoteAdapter.softDelete(
+              table: config.name,
+              id: pkValue,
+              payload: {
+                config.deletedAtColumn: row[config.deletedAtColumn],
+                config.updatedAtColumn:
+                    row[config.updatedAtColumn] ??
+                    DateTime.now().toUtc().toIso8601String(),
+              },
+            );
+          } else {
+            // NORMALER UPSERT
+            await remoteAdapter.upsert(table: config.name, data: uploadData);
+          }
+        });
+
+        // Nach erfolgreichem Push lokal als gesynct markieren
+        await localStore.markAsSynced(config.name, config.primaryKey, pkValue);
+      } catch (e) {
+        // Hier in Produktion loggen (z.B. Sentry oder Print)
+        print(
+          '⚠️ Sync Push failed for ${config.name} (ID: ${row[config.primaryKey]}): $e',
+        );
+      }
     }
   }
 
@@ -103,8 +151,16 @@ class SyncEngine {
         return null;
 
       case SyncStrategy.lastWriteWins:
-        final localDate = DateTime.tryParse(local['updated_at'] ?? '');
-        final remoteDate = DateTime.tryParse(remote['updated_at'] ?? '');
+        // Dynamische Nutzung der konfigurierten Timestamps
+        final localDateStr = local[config.updatedAtColumn]?.toString();
+        final remoteDateStr = remote[config.updatedAtColumn]?.toString();
+
+        final localDate = localDateStr != null
+            ? DateTime.tryParse(localDateStr)
+            : null;
+        final remoteDate = remoteDateStr != null
+            ? DateTime.tryParse(remoteDateStr)
+            : null;
 
         if (remoteDate != null &&
             localDate != null &&

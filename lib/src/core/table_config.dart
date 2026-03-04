@@ -9,6 +9,8 @@ typedef ConflictResolver =
 class TableConfig {
   final String name;
   final String primaryKey;
+  final String updatedAtColumn;
+  final String deletedAtColumn;
   final List<String> columns;
   final SyncStrategy strategy;
   final ConflictResolver? customResolver;
@@ -16,6 +18,8 @@ class TableConfig {
   const TableConfig({
     required this.name,
     this.primaryKey = 'id',
+    this.updatedAtColumn = 'updated_at',
+    this.deletedAtColumn = 'deleted_at',
     required this.columns,
     this.strategy = SyncStrategy.serverWins,
     this.customResolver,

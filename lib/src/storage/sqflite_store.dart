@@ -17,6 +17,7 @@ class SqfliteStore implements LocalStore {
     String table,
     List<Map<String, dynamic>> records,
   ) async {
+    if (records.isEmpty) return;
     final batch = db.batch();
     for (final record in records) {
       batch.insert(table, record, conflictAlgorithm: ConflictAlgorithm.replace);
@@ -25,24 +26,47 @@ class SqfliteStore implements LocalStore {
   }
 
   @override
-  Future<void> markAsSynced(String table, dynamic primaryKey) async {
+  Future<void> markAsSynced(
+    String table,
+    String pkColumn,
+    dynamic primaryKey,
+  ) async {
     await db.update(
       table,
       {isSyncedColumn: 1},
-      where: 'id = ?',
+      where: '$pkColumn = ?',
       whereArgs: [primaryKey],
     );
   }
 
   @override
-  Future<Map<String, dynamic>?> findById(String table, dynamic id) async {
+  Future<Map<String, dynamic>?> findById(
+    String table,
+    String pkColumn,
+    dynamic id,
+  ) async {
     final result = await db.query(
       table,
-      where: 'id = ?',
+      where: '$pkColumn = ?',
       whereArgs: [id],
       limit: 1,
     );
-
     return result.isEmpty ? null : result.first;
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> findManyByIds(
+    String table,
+    String pkColumn,
+    List<dynamic> ids,
+  ) async {
+    if (ids.isEmpty) return [];
+
+    final placeholders = List.filled(ids.length, '?').join(',');
+    return await db.query(
+      table,
+      where: '$pkColumn IN ($placeholders)',
+      whereArgs: ids,
+    );
   }
 }
