@@ -182,4 +182,4 @@ Push: Finds all local records with is_synced = 0. Uploads them to Supabase using
 
 ## 📄 License
 
-MIT License. See LICENSE for details.
+No public use allowed
