@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:replicore/replicore.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,7 +34,10 @@ void main() async {
 
   final engine = SyncEngine(
     localStore: SqfliteStore(db),
-    remoteAdapter: SupabaseAdapter(Supabase.instance.client),
+    remoteAdapter: SupabaseAdapter(
+        client: Supabase.instance.client,
+        prefs: await SharedPreferences.getInstance(),
+        updatedAtColumn: 'updated_at'),
   );
 
   engine.registerTable(
@@ -50,7 +54,7 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

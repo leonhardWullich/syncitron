@@ -19,64 +19,62 @@ class SupabaseAdapter implements RemoteAdapter {
     final lastSyncStr = prefs.getString(lastSyncKey);
     final lastSync = lastSyncStr != null ? DateTime.parse(lastSyncStr) : null;
 
-    int offset = 0;
-    bool hasMore = true;
-    final List<Map<String, dynamic>> allRecords = [];
+    var queryBuilder = client
+        .from(request.table)
+        .select(request.columns.join(','));
 
-    while (hasMore) {
-      var queryBuilder = client
-          .from(request.table)
-          .select(request.columns.join(','));
-
-      // incremental pull only
-      if (lastSync != null) {
-        queryBuilder = queryBuilder.gt(
-          updatedAtColumn,
-          lastSync.toIso8601String(),
-        );
-      }
-
-      // stable order for pagination
-      final orderedBuilder = queryBuilder
-          .order(updatedAtColumn, ascending: true)
-          .limit(request.limit);
-
-      // fetch batch
-      final batchData = await orderedBuilder.range(
-        offset,
-        offset + request.limit - 1,
+    // Cursor-Paginierung: Lade nur Datensätze, die NEUER sind als der Cursor.
+    // Wenn kein Cursor da ist (erster Durchlauf), nimm den lastSync der ganzen Tabelle.
+    if (request.cursor != null) {
+      queryBuilder = queryBuilder.gt(
+        updatedAtColumn,
+        request.cursor!.updatedAt.toIso8601String(),
       );
-
-      if (batchData.isEmpty) {
-        hasMore = false;
-        break;
-      }
-
-      // append to allRecords
-      allRecords.addAll(List<Map<String, dynamic>>.from(batchData));
-
-      if (batchData.length < request.limit) {
-        hasMore = false;
-      } else {
-        offset += request.limit;
-      }
+    } else if (lastSync != null) {
+      queryBuilder = queryBuilder.gt(
+        updatedAtColumn,
+        lastSync.toIso8601String(),
+      );
     }
 
-    // update last sync timestamp after successful pull
-    if (allRecords.isNotEmpty) {
-      final latest = allRecords.last;
-      final lastUpdated = latest[updatedAtColumn] as String;
-      await prefs.setString(lastSyncKey, lastUpdated);
+    // Lade genau EINEN Batch, geordnet nach Zeitstempel
+    final batchData = await queryBuilder
+        .order(updatedAtColumn, ascending: true)
+        // Wir limitieren strikt auf die angefragte Batch-Size
+        .limit(request.limit);
+
+    final records = List<Map<String, dynamic>>.from(batchData);
+
+    SyncCursor? nextCursor;
+
+    if (records.isNotEmpty) {
+      // Der Cursor für die nächste Anfrage ist der Zeitstempel des LETZTEN Datensatzes
+      final latestRecord = records.last;
+      nextCursor = SyncCursor(
+        updatedAt: DateTime.parse(latestRecord[updatedAtColumn]),
+        primaryKey:
+            latestRecord['id'], // Info: Bei dynamischem PK müsste man hier request.primaryKey übergeben!
+      );
+
+      // Wenn dies der letzte Batch war (wir haben weniger bekommen als angefragt),
+      // merken wir uns den finalen Zeitstempel für den nächsten App-Start.
+      if (records.length < request.limit) {
+        await prefs.setString(lastSyncKey, latestRecord[updatedAtColumn]);
+      }
+    } else if (request.cursor == null) {
+      // Fallback: Es gab gar keine neuen Daten. Timestamp aktualisieren, damit
+      // wir wissen, dass ein erfolgreicher Sync-Check stattgefunden hat.
+      await prefs.setString(
+        lastSyncKey,
+        DateTime.now().toUtc().toIso8601String(),
+      );
     }
 
     return PullResult(
-      records: allRecords,
-      nextCursor: allRecords.isNotEmpty
-          ? SyncCursor(
-              updatedAt: DateTime.parse(allRecords.last[updatedAtColumn]),
-              primaryKey: allRecords.last['id'],
-            )
-          : null,
+      records: records,
+      nextCursor: records.length == request.limit
+          ? nextCursor
+          : null, // Nur einen nextCursor liefern, wenn es noch mehr geben könnte
     );
   }
 

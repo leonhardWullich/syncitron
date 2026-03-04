@@ -1,3 +1,4 @@
+import 'dart:async';
 import '../adapters/remote_adapter.dart';
 import '../storage/local_store.dart';
 import '../utils/retry.dart';
@@ -12,11 +13,37 @@ class SyncEngine {
 
   final List<TableConfig> _tables = [];
 
+  final _statusController = StreamController<String>.broadcast();
+  Stream<String> get statusStream => _statusController.stream;
+
+  bool _initialized = false;
+
   SyncEngine({
     required this.localStore,
     required this.remoteAdapter,
     this.batchSize = 500,
   });
+
+  Future<void> init() async {
+    if (_initialized) return;
+
+    _statusController.add('Initializing local database schema...');
+
+    for (final table in _tables) {
+      await localStore.ensureSyncColumns(
+        table.name,
+        table.updatedAtColumn,
+        table.deletedAtColumn,
+      );
+    }
+
+    _initialized = true;
+    _statusController.add('Ready.');
+  }
+
+  void dispose() {
+    _statusController.close();
+  }
 
   SyncEngine registerTable(TableConfig config) {
     _tables.add(config);
@@ -24,17 +51,33 @@ class SyncEngine {
   }
 
   Future<void> syncAll() async {
-    for (final table in _tables) {
-      await syncTable(table);
+    _statusController.add('Starting Full Sync...');
+    try {
+      for (final table in _tables) {
+        await syncTable(table);
+      }
+      _statusController.add('Sync completed successfully.');
+    } catch (e) {
+      _statusController.add('Critical Sync Error.');
+      print('❌ SyncAll Error: $e');
     }
   }
 
   Future<void> syncTable(TableConfig config) async {
-    await _pull(config);
-    await _push(config);
+    await init();
+
+    _statusController.add('Syncing ${config.name}...');
+    try {
+      await _pull(config);
+      await _push(config);
+    } catch (e) {
+      _statusController.add('Error syncing ${config.name}');
+      rethrow;
+    }
   }
 
   Future<void> _pull(TableConfig config) async {
+    _statusController.add('Downloading ${config.name}...');
     SyncCursor? cursor;
 
     while (true) {
@@ -53,7 +96,6 @@ class SyncEngine {
 
       final merged = <Map<String, dynamic>>[];
 
-      // OPTIMIERUNG: N+1 Problem behoben! Alle lokalen Datensätze auf einmal laden.
       final remoteIds = result.records
           .map((r) => r[config.primaryKey])
           .where((id) => id != null)
@@ -65,7 +107,6 @@ class SyncEngine {
         remoteIds,
       );
 
-      // Für schnellen Lookup als Map konvertieren
       final localRecordsMap = {
         for (var row in localRecords) row[config.primaryKey].toString(): row,
       };
@@ -96,13 +137,17 @@ class SyncEngine {
   Future<void> _push(TableConfig config) async {
     final dirty = await localStore.queryDirty(config.name);
 
+    if (dirty.isNotEmpty) {
+      _statusController.add(
+        'Uploading ${dirty.length} changes for ${config.name}...',
+      );
+    }
+
     for (final row in dirty) {
-      // FEHLERTOLERANZ: Fehler eines Datensatzes crasht nicht den ganzen Sync
       try {
         final pkValue = row[config.primaryKey];
         if (pkValue == null) continue;
 
-        // Kopie erstellen und lokale Hilfsspalten entfernen, die nicht zum Server sollen
         final uploadData = Map<String, dynamic>.from(row);
         uploadData.remove('is_synced');
 
@@ -110,7 +155,6 @@ class SyncEngine {
 
         await retry(() async {
           if (isSoftDeleted) {
-            // SOFT DELETE SUPPORT
             await remoteAdapter.softDelete(
               table: config.name,
               id: pkValue,
@@ -122,15 +166,12 @@ class SyncEngine {
               },
             );
           } else {
-            // NORMALER UPSERT
             await remoteAdapter.upsert(table: config.name, data: uploadData);
           }
         });
 
-        // Nach erfolgreichem Push lokal als gesynct markieren
         await localStore.markAsSynced(config.name, config.primaryKey, pkValue);
       } catch (e) {
-        // Hier in Produktion loggen (z.B. Sentry oder Print)
         print(
           '⚠️ Sync Push failed for ${config.name} (ID: ${row[config.primaryKey]}): $e',
         );
@@ -151,7 +192,6 @@ class SyncEngine {
         return null;
 
       case SyncStrategy.lastWriteWins:
-        // Dynamische Nutzung der konfigurierten Timestamps
         final localDateStr = local[config.updatedAtColumn]?.toString();
         final remoteDateStr = remote[config.updatedAtColumn]?.toString();
 
