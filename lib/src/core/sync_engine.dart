@@ -311,7 +311,6 @@ class SyncEngine {
           UseRemote(data: final d) => d,
           UseMerged(data: final d) => d,
           Map<String, dynamic>() => throw UnimplementedError(),
-          null => throw UnimplementedError(),
         };
     }
   }
