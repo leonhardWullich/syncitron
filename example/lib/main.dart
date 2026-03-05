@@ -1,65 +1,140 @@
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:path/path.dart';
 import 'package:replicore/replicore.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:path/path.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-void main() async {
+import 'sync/sync_service.dart';
+import 'ui/login_screen.dart';
+import 'ui/todo_list_screen.dart';
+
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // SQLite Setup
-  final dbPath = await getDatabasesPath();
-  final path = join(dbPath, 'replicore_demo.db');
+  // ── 1. Initialize Supabase ─────────────────────────────────────────────────
+  // IMPORTANT: Run the setup in example/supabase_setup.md to create the tables
+  // or provide the required credentials below.
+  await Supabase.initialize(
+    url: const String.fromEnvironment('SUPABASE_URL',
+        defaultValue: 'https://eymcvxrloanvjapoogkh.supabase.co'),
+    anonKey: const String.fromEnvironment('SUPABASE_ANON_KEY',
+        defaultValue:
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV5bWN2eHJsb2FudmphcG9vZ2toIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2MzM3ODEsImV4cCI6MjA4ODIwOTc4MX0.Coe-WYoXPsf88Xwy4ZIgRyrA0w4nq9Mm1bC5VrCc1lI'),
+  );
+
+  // ── 2. Open Local SQLite Database ──────────────────────────────────────────
   final db = await openDatabase(
-    path,
+    join(await getDatabasesPath(), 'replicore_example.db'),
     version: 1,
-    onCreate: (db, version) async {
+    onCreate: (db, _) async {
+      // Minimal schema — Replicore adds sync columns automatically via
+      // ensureSyncColumns() during engine.init().
       await db.execute('''
-      CREATE TABLE todos(
-        id TEXT PRIMARY KEY,
-        title TEXT,
-        updated_at TEXT,
-        is_synced INTEGER
-      )
-    ''');
+        CREATE TABLE todos (
+          id       TEXT PRIMARY KEY NOT NULL,
+          user_id  TEXT NOT NULL,
+          title    TEXT NOT NULL,
+          is_done  INTEGER NOT NULL DEFAULT 0
+        )
+      ''');
     },
   );
 
-  // Supabase Setup
-  await Supabase.initialize(
-    url: 'YOUR_SUPABASE_URL',
-    anonKey: 'YOUR_SUPABASE_ANON_KEY',
+  // ── 3. Initialize Replicore ────────────────────────────────────────────────
+
+  // Create local store (handles both data and sync cursors)
+  final localStore = SqfliteStore(db);
+
+  // Create remote adapter for Supabase
+  final remoteAdapter = SupabaseAdapter(
+    client: Supabase.instance.client,
+    localStore: localStore,
   );
 
+  // Create logger (console output for development)
+  final logger = ConsoleLogger(minLevel: LogLevel.info);
+
+  // Create metrics collector (in-memory for this example)
+  final metricsCollector = InMemoryMetricsCollector();
+
+  // Create SyncEngine with production configuration
   final engine = SyncEngine(
-    localStore: SqfliteStore(db),
-    remoteAdapter: SupabaseAdapter(
-        client: Supabase.instance.client,
-        prefs: await SharedPreferences.getInstance(),
-        updatedAtColumn: 'updated_at'),
-  );
+    localStore: localStore,
+    remoteAdapter: remoteAdapter,
+    config: ReplicoreConfig.production(),
+    logger: logger,
+    metricsCollector: metricsCollector,
+  )..registerTable(
+      TableConfig(
+        name: 'todos',
+        primaryKey: 'id',
+        columns: [
+          'id',
+          'user_id',
+          'title',
+          'is_done',
+          'updated_at',
+          'deleted_at',
+        ],
+        // Last write (most recent timestamp) wins on conflict
+        strategy: SyncStrategy.lastWriteWins,
+      ),
+    );
 
-  engine.registerTable(
-    TableConfig(
-      name: 'todos',
-      columns: ['id', 'title', 'updated_at', 'is_synced'],
-    ),
-  );
+  // Initialize engine (idempotent — safe to call on every app start)
+  try {
+    await engine.init();
+  } catch (e) {
+    logger.error('Failed to initialize Replicore engine', error: e);
+    // Continue anyway — the app can still function offline
+  }
 
-  // Run sync
-  await engine.syncAll();
+  // ── 4. Setup Background Sync ───────────────────────────────────────────────
+  SyncService.instance.start(engine: engine);
 
-  runApp(const MyApp());
+  runApp(TodoApp(
+    db: db,
+    engine: engine,
+    logger: logger,
+    metricsCollector: metricsCollector,
+  ));
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+// ── Root Widget ────────────────────────────────────────────────────────────────
+
+class TodoApp extends StatelessWidget {
+  final Database db;
+  final SyncEngine engine;
+  final Logger logger;
+  final MetricsCollector metricsCollector;
+
+  const TodoApp({
+    super.key,
+    required this.db,
+    required this.engine,
+    required this.logger,
+    required this.metricsCollector,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(body: Center(child: Text('Replicore v0.1 Demo'))),
+    final currentUser = Supabase.instance.client.auth.currentUser;
+
+    return MaterialApp(
+      title: 'Replicore Todo Example',
+      theme: ThemeData(
+        colorSchemeSeed: Colors.indigo,
+        useMaterial3: true,
+      ),
+      home: currentUser != null
+          ? TodoListScreen(
+              db: db,
+              engine: engine,
+              logger: logger,
+              metricsCollector: metricsCollector,
+            )
+          : const LoginScreen(),
+      debugShowCheckedModeBanner: false,
     );
   }
 }

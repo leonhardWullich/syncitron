@@ -1,18 +1,37 @@
-name: example
-description: example local-first app
+name: todo_app
+description: >
+  Example app demonstrating Replicore offline-first sync with a simple
+  Todo list backed by SQLite (local) and Supabase (remote).
 
-publish_to: 'none'
+publish_to: none
+version: 1.0.0+1
 
 environment:
-  sdk: ">=2.15.1 <4.0.0"
+  sdk: '>=3.3.0 <4.0.0'
 
 dependencies:
   flutter:
     sdk: flutter
 
+  # Replicore — local-first sync framework
   replicore:
     path: ../
+
+  # Local database
+  sqflite: ^2.3.3
+  path: ^1.9.0
+
+  # Remote backend
+  supabase_flutter: ^2.5.0
+
+  # Utilities
+  uuid: ^4.4.0           # for generating collision-safe UUIDs as primary keys
+  connectivity_plus: ^7.0.0  # to trigger sync on reconnect
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
