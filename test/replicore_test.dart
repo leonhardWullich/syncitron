@@ -121,6 +121,9 @@ class FakeRemoteAdapter implements RemoteAdapter {
   final Set<String> failedOpIds = {};
 
   @override
+  RealtimeSubscriptionProvider? getRealtimeProvider() => null;
+
+  @override
   Future<PullResult> pull(PullRequest request) async {
     pullRequests.add(request);
     final source = List<Map<String, dynamic>>.from(
@@ -655,6 +658,9 @@ class _FailingPullAdapter implements RemoteAdapter {
 
   @override
   Future<PullResult> pull(PullRequest request) async => onPull();
+
+  @override
+  RealtimeSubscriptionProvider? getRealtimeProvider() => null;
 
   @override
   Future<void> softDelete({

@@ -1,4 +1,5 @@
 import '../core/models.dart';
+import '../core/realtime_subscription.dart';
 
 abstract class RemoteAdapter {
   Future<PullResult> pull(PullRequest request);
@@ -16,4 +17,8 @@ abstract class RemoteAdapter {
     required Map<String, dynamic> payload,
     String? idempotencyKey,
   });
+
+  /// Optional real-time subscription provider.
+  /// Return null if this adapter doesn't support real-time updates.
+  RealtimeSubscriptionProvider? getRealtimeProvider() => null;
 }

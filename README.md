@@ -46,6 +46,32 @@ Building offline-capable apps is **hard**. Developers struggle with:
 - 📈 **Metrics & Analytics**: Track sync performance, export to external systems
 - 🔗 **Dependency Injection**: Fully composable, testable architecture
 
+### 🚀 v0.5.0 - Ecosystem Expansion + Real-Time
+
+**Real-Time Event-Driven Sync (NEW!):**
+- 📡 **Real-Time Subscriptions**: Listen to backend changes without polling
+  - Instant updates via Firebase Firestore real-time listeners
+  - Configurable auto-sync on change detection
+  - Smart debouncing to prevent sync storms
+  - Auto-reconnection with exponential backoff
+  - Battery-friendly (no polling overhead)
+
+**Multiple Storage & Backend Options:**
+
+**📦 LocalStores** (choose based on performance/features):
+- 🗄️ **Sqflite** (Default SQLite) - battle-tested
+- 🔐 **Drift** (Type-safe SQLite) - compile-time safety
+- 📦 **Hive** (Lightweight NoSQL) - zero dependencies
+- ⚡ **Isar** (Rust-backed, high-performance) - indexed, real-time
+
+**🌐 RemoteAdapters** (any backend):
+- 🔶 **Firebase Firestore** - real-time, offline persistence native
+- 🌍 **Appwrite** - self-hosted, open-source BaaS
+- 🚀 **GraphQL** - any GraphQL backend (Hasura, Apollo, Supabase GraphQL)
+- 💜 **Supabase** (v0.4.0) - still fully supported
+
+**👉 New in v0.5.0**: See [Ecosystem Expansion Guide](docs/v0_5_0_ECOSYSTEM_GUIDE.md) to choose the perfect combination for your needs.
+
 ---
 
 ## 📦 Installation
@@ -60,16 +86,34 @@ Or manually:
 
 ```yaml
 dependencies:
-  replicore: ^0.2.0
+  replicore: ^0.5.0
   sqflite: ^2.4.2
   supabase_flutter: ^2.12.0
+```
+
+For other backends, add only what you need:
+
+```yaml
+dependencies:
+  replicore: ^0.5.0
+  
+  # LocalStores (pick one)
+  drift: ^2.14.0          # For type-safe SQL
+  hive_flutter: ^1.1.0    # For lightweight NoSQL
+  isar: ^3.1.0            # For high-performance
+  
+  # RemoteAdapters (pick one)
+  firebase_core: ^2.24.0
+  cloud_firestore: ^4.13.0
+  appwrite: ^11.0.0
+  graphql: ^5.1.0
 ```
 
 ---
 
 ## 🚀 Quick Start (5 minutes)
 
-### 1️⃣ Setup Flutter and Supabase
+### 1️⃣ Setup Flutter and Supabase (Default Option)
 
 ```dart
 import 'package:flutter/material.dart';
@@ -193,6 +237,252 @@ class TodosScreen extends StatelessWidget {
 ```
 
 **Done!** Your app now has offline-first capabilities. ✅
+
+## 🎨 Out-of-the-Box UI Components
+
+Don't reinvent the wheel! Replicore comes with a suite of production-ready, highly customizable Flutter widgets to handle complex sync states, network errors, and offline indicators effortlessly.
+
+### Available Widgets
+
+#### 1. **SyncStatusWidget**
+Displays the current synchronization status with an optional manual sync button.
+
+```dart
+SyncStatusWidget(
+  statusStream: engine.statusStream,
+  onSync: () => engine.syncAll(),
+  showProgress: true, // Shows CircularProgressIndicator during sync
+  builder: (context, status) => Text(status), // Optional custom builder
+)
+```
+
+**Features:**
+- Real-time status updates via Stream
+- Optional progress indicator
+- Customizable appearance with builder pattern
+- Perfect for app bars or status areas
+
+#### 2. **SyncMetricsCard**
+Shows detailed synchronization metrics in a beautiful card format.
+
+```dart
+SyncMetricsCard(
+  metrics: syncSessionMetrics,
+  elevation: 2,
+  backgroundColor: Colors.white,
+)
+```
+
+**Displays:**
+- Records pulled/pushed counts
+- Sync duration
+- Conflict count
+- Error count
+- Overall success status
+- Pretty-printed metrics summary
+
+#### 3. **SyncErrorBanner**
+Context-aware error banner that automatically handles different error types.
+
+```dart
+SyncErrorBanner(
+  statusStream: engine.statusStream,
+  onRetry: () => engine.syncAll(),
+  showDismiss: true,
+)
+```
+
+**Features:**
+- Auto-detects error type (network, auth, schema, server)
+- Color-coded by error severity
+- Built-in retry button
+- Dismissible with auto-hide
+- Network/offline state detection
+
+#### 4. **SyncStatusPanel**
+Comprehensive dashboard combining all sync UI elements in one place.
+
+```dart
+SyncStatusPanel(
+  statusStream: engine.statusStream,
+  metricsStream: engine.metricsStream,
+  onSync: () => engine.syncAll(),
+  showMetrics: true,
+  showErrors: true,
+  showOfflineIndicator: true,
+)
+```
+
+**Combines:**
+- Status display
+- Metrics card
+- Error banner
+- Offline indicator
+- Manual sync button
+
+**Perfect for:**
+- Settings screens
+- Dashboard views
+- Comprehensive status pages
+
+#### 5. **OfflineIndicator**
+Sleek chip that automatically shows when device is offline.
+
+```dart
+OfflineIndicator(
+  icon: Icons.cloud_off,
+  label: 'Offline',
+  backgroundColor: Colors.grey,
+)
+```
+
+**Features:**
+- Only visible when offline
+- Customizable icon and label
+- Automatic connectivity detection
+- Perfect for app bars
+
+#### 6. **SyncButton**
+Smart floating action button with automatic loading state during sync.
+
+```dart
+SyncButton(
+  onSync: () async {
+    final metrics = await engine.syncAll();
+    print('Sync complete: ${metrics.overallSuccess}');
+  },
+  icon: Icons.sync,
+  loadingIcon: Icon(Icons.hourglass_bottom),
+  disabledColor: Colors.grey,
+)
+```
+
+**Features:**
+- Auto-disables during sync
+- Custom loading state
+- Progress indication
+- Error handling
+
+### Full Example: Integrated Sync Dashboard
+
+```dart
+import 'package:flutter/material.dart';
+import 'package:replicore/replicore.dart';
+
+class SyncDashboard extends StatefulWidget {
+  final SyncEngine engine;
+  
+  const SyncDashboard({required this.engine});
+
+  @override
+  State<SyncDashboard> createState() => _SyncDashboardState();
+}
+
+class _SyncDashboardState extends State<SyncDashboard> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Sync Manager'),
+        // Show offline indicator in app bar
+        actions: [
+          OfflineIndicator(),
+        ],
+        // Error banner below app bar
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(50),
+          child: SyncErrorBanner(
+            statusStream: widget.engine.statusStream,
+            onRetry: () => widget.engine.syncAll(),
+          ),
+        ),
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Status widget
+              SyncStatusWidget(
+                statusStream: widget.engine.statusStream,
+                onSync: () => widget.engine.syncAll(),
+                showProgress: true,
+              ),
+              const SizedBox(height: 16),
+              
+              // Metrics card
+              StreamBuilder<SyncSessionMetrics>(
+                stream: widget.engine.metricsStream,
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    return SyncMetricsCard(
+                      metrics: snapshot.data!,
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
+              ),
+              const SizedBox(height: 24),
+              
+              // Manual sync button
+              ElevatedButton.icon(
+                onPressed: () => widget.engine.syncAll(),
+                icon: const Icon(Icons.sync),
+                label: const Text('Sync Now'),
+              ),
+            ],
+          ),
+        ),
+      ),
+      // Floating action button for quick sync
+      floatingActionButton: SyncButton(
+        onSync: () async {
+          await widget.engine.syncAll();
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Sync complete!')),
+          );
+        },
+      ),
+    );
+  }
+}
+```
+
+### Widget Customization
+
+All widgets support extensive customization through properties:
+
+```dart
+// Custom SyncStatusWidget
+SyncStatusWidget(
+  statusStream: engine.statusStream,
+  onSync: () => engine.syncAll(),
+  builder: (context, status) {
+    // Complete control over rendering
+    return Card(
+      child: Padding(
+        padding: EdgeInsets.all(16),
+        child: Column(
+          children: [
+            Icon(Icons.sync_outlined),
+            Text(status, style: TextStyle(fontSize: 18)),
+          ],
+        ),
+      ),
+    );
+  },
+)
+
+// Custom SyncErrorBanner
+SyncErrorBanner(
+  statusStream: engine.statusStream,
+  onRetry: () => engine.syncAll(),
+  backgroundColor: Colors.red.shade100,
+  textColor: Colors.red.shade900,
+  actionColor: Colors.red.shade600,
+)
+```
 
 ---
 

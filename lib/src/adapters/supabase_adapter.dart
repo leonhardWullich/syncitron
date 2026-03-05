@@ -2,8 +2,10 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../core/exceptions.dart';
 import '../core/models.dart';
+import '../core/realtime_subscription.dart';
 import '../storage/local_store.dart';
 import 'remote_adapter.dart';
+import 'supabase_realtime.dart';
 
 /// [RemoteAdapter] implementation backed by Supabase.
 ///
@@ -153,5 +155,10 @@ class SupabaseAdapter implements RemoteAdapter {
     if (value == null) return 'null';
     final escaped = value.toString().replaceAll('"', '\\"');
     return '"$escaped"';
+  }
+
+  @override
+  RealtimeSubscriptionProvider? getRealtimeProvider() {
+    return SupabaseRealtimeProvider(client: client);
   }
 }

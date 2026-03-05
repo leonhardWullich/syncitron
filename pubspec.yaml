@@ -10,7 +10,7 @@ description: |
   Perfect for building offline-capable enterprise applications with 
   automatic sync, conflict resolution strategies, and advanced monitoring.
 
-version: 0.4.0
+version: 0.5.0
 homepage: https://github.com/leonhardWullich/replicore
 repository: https://github.com/leonhardWullich/replicore
 documentation: https://github.com/leonhardWullich/replicore/docs

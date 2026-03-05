@@ -311,53 +311,693 @@ TableConfig(
 
 ## 🎼 Sync Orchestration (Macro-Level Flow)
 
-While Conflict Resolution handles row-level data merges (`SyncStrategy`), the **SyncOrchestrationStrategy** controls the macro-level flow of your synchronization process. 
+### Orchestration vs. Conflict Resolution: What's the Difference?
 
-In enterprise environments, you rarely want to treat all tables equally during a sync. You need fine-grained control over execution order, fault tolerance, and lifecycle hooks (e.g., pre-sync validation or post-sync analytics). Replicore allows you to orchestrate the entire sync lifecycle.
+In enterprise environments, you need **two levels of control**:
 
-### Priority-Based Orchestration
-Ensures critical business data is synchronized first and fails-fast on errors, while optional data gracefully degrades on poor connections.
+1. **Conflict Resolution** (Row-level): When the same record is modified locally AND remotely, which version wins? (Covered in earlier section)
+2. **Sync Orchestration** (Flow-level): In what order should tables sync? How should the system behave when one table fails? What hooks do we need for pre/post-processing?
+
+While Conflict Resolution answers "how to merge data," Sync Orchestration answers "how to orchestrate the entire sync workflow."
+
+### Core Concept: Orchestration Strategies
+
+The `SyncOrchestrationStrategy` interface allows you to implement custom sync workflows. Replicore provides five production-ready strategies, but you can build your own.
+
+```dart
+abstract class SyncOrchestrationStrategy {
+  Future<SyncSessionMetrics> execute(SyncEngine engine);
+}
+```
+
+---
+
+## 📊 Built-in Orchestration Strategies
+
+### 1. **StandardSyncOrchestration** (Default)
+
+Simple, predictable sync: push all local changes first, then pull all remote changes. Best for most applications.
+
+```dart
+final metrics = await engine.syncWithOrchestration(
+  StandardSyncOrchestration(),
+);
+
+// Flow:
+// 1. Push local changes for all tables (batched)
+// 2. Pull remote changes for all tables (batched)
+// 3. Return metrics (conflicts, errors, duration)
+```
+
+**When to use:**
+- Simple CRUD apps with occasional conflicts
+- All tables have equal importance
+- Network is relatively stable
+- You don't need pre/post-sync hooks
+
+**Characteristics:**
+- Fast and straightforward
+- Treats all tables equally
+- Fails on first critical error
+- Minimal overhead
+
+---
+
+### 2. **PrioritySyncOrchestration**
+
+Enterprise favorite! Syncs tables in priority order and fails-fast on high-priority data, while gracefully degrading on lower-priority data.
 
 ```dart
 final metrics = await engine.syncWithOrchestration(
   PrioritySyncOrchestration({
-    'users': 100,        // Critical: Syncs first, fails fast on error
-    'subscriptions': 90, 
-    'cache_assets': 10,  // Optional: Tolerates network errors and skips gracefully
+    'users': 100,              // Critical: Must succeed
+    'subscriptions': 90,       // High: Fail-fast
+    'order_items': 80,         // Medium: Warn on error
+    'cache_images': 10,        // Low: Skip gracefully
+    'analytics_events': 1,     // Lowest: Best-effort only
   }),
 );
+
+// Flow:
+// 1. Sort tables by priority (descending)
+// 2. Push each table (prioritized)
+// 3. Pull each table (prioritized)
+// 4. High-priority failures → stop immediately
+// 5. Low-priority failures → log warning, continue
 ```
 
-### Offline-First Orchestration
+**When to use:**
+- Enterprise applications with dependent data hierarchies
+- Some tables are more critical than others
+- Need fail-fast semantics for core data
+- Want graceful degradation for secondary data
 
-Designed for field-service apps or environments with unreliable networks (e.g., edge computing, emerging markets). It tolerates a specific number of network timeouts before cleanly aborting the sync loop, preventing infinite retries and battery drain.
+**Example: E-commerce Platform**
+```dart
+final ecommercePriorities = {
+  'users': 100,              // Must have users
+  'accounts': 95,            // Must have accounts
+  'orders': 90,              // Core business data
+  'order_items': 85,         // Detail lines
+  'inventory': 80,           // Important but can retry
+  'reviews': 50,             // Nice to have
+  'recommendations': 20,     // Best-effort only
+};
+
+final metrics = await engine.syncWithOrchestration(
+  PrioritySyncOrchestration(ecommercePriorities),
+);
+
+// If 'orders' fails: entire sync stops (critical data)
+// If 'reviews' fails: logged as warning, sync continues
+```
+
+**Error Behavior Chart:**
+
+| Priority | 100-80 | 79-30 | 29-1 |
+|----------|--------|-------|------|
+| Error Handling | Fail-fast (stop) | Warn & continue | Log & ignore |
+| Retry Count | 5 | 3 | 1 |
+| Impact | Blocks release | User sees warning | Invisible to user |
+
+---
+
+### 3. **OfflineFirstSyncOrchestration**
+
+Designed for unreliable networks, poor connectivity zones, and battery-conscious apps. Tolerates a specific number of transient errors before gracefully backing off.
 
 ```dart
 final metrics = await engine.syncWithOrchestration(
-  OfflineFirstSyncOrchestration(maxNetworkErrors: 3),
+  OfflineFirstSyncOrchestration(
+    maxNetworkErrors: 3,      // Abort after 3 timeouts
+    backoffMultiplier: 2.0,   // 1s → 2s → 4s delays
+    maxBackoffDuration: Duration(seconds: 30),
+  ),
+);
+
+// Flow:
+// 1. Attempt sync with normal retry logic
+// 2. Count network timeouts/connection failures
+// 3. If count reaches maxNetworkErrors → abort gracefully
+// 4. User gets "last synced X minutes ago" message
+// 5. Next manual sync starts fresh retry count
+```
+
+**When to use:**
+- Field-service apps (delivery drivers, technicians)
+- Emerging markets with spotty connectivity
+- Rural/remote deployments
+- Battery-critical scenarios (drones, IoT)
+- Apps running on shaky 2G/3G networks
+
+**Real-World Example: Delivery Driver App**
+```dart
+// Driver is in rural area with poor signal
+// Their phone might go offline multiple times
+
+final driverSyncConfig = OfflineFirstSyncOrchestration(
+  maxNetworkErrors: 5,  // Allow 5 timeout attempts within sync window
+  backoffMultiplier: 1.5,
+  maxBackoffDuration: Duration(minutes: 2),
+);
+
+final result = await engine.syncWithOrchestration(driverSyncConfig);
+
+if (!result.overallSuccess) {
+  // Instead of angry error, show graceful message:
+  showMessage(
+    'Last synced at ${result.lastSyncTime}. '
+    'Will retry when connection improves.'
+  );
+}
+```
+
+**Network Behavior:**
+```
+Attempt 1: Timeout (1s backoff)
+Attempt 2: Timeout (1.5s backoff)
+Attempt 3: Timeout (2.25s backoff)
+Attempt 4: Timeout (3.375s backoff)
+Attempt 5: Timeout (5s backoff) → STOP
+Result: "We'll try again later" (graceful)
+```
+
+---
+
+### 4. **StrictManualOrchestration**
+
+Zero automatic retries. Every error surfaces immediately to your code, giving complete control over failure handling.
+
+```dart
+final metrics = await engine.syncWithOrchestration(
+  StrictManualOrchestration(
+    autoRetry: false,         // NEVER retry automatically
+    throwOnError: true,       // Throw exception on any error
+  ),
 );
 ```
 
-### Composite Orchestration (Pipelines)
+**When to use:**
+- Payment processing (never auto-retry payment syncs)
+- PII/Healthcare data (strict audit trail needed)
+- Financial transactions
+- Compliance-sensitive workflows
+- You want explicit error handling in your code
 
-Enterprise architectures often require complex sync pipelines. You can chain multiple strategies together to create custom workflows with pre- and post-processing hooks.
+**Medical Records Example:**
+```dart
+try {
+  final metrics = await engine.syncWithOrchestration(
+    StrictManualOrchestration(),
+  );
+  // Log: "Patient records synced successfully"
+  auditLog.logSuccess(userId, metrics);
+} on SyncError catch (e) {
+  // NEVER ignore! Explicitly handle:
+  if (e is AuthenticationError) {
+    navigateToReLoginScreen();
+  } else if (e is NetworkError) {
+    // Don't auto-retry; ask user permission first
+    showErrorDialog('Network failed. Retry?', onRetry: () {
+      // User explicitly chose to retry
+      engine.syncAll();
+    });
+  } else if (e is ConflictError) {
+    // Medical records shouldn't auto-merge; escalate to clinician
+    notifyClinicianOfConflict(e.conflictedRecords);
+  }
+  auditLog.logError(userId, e);
+}
+```
+
+**Contrast with StandardSyncOrchestration:**
+```dart
+// Standard: Logs errors, continues app, tries to recover
+final metrics = await engine.syncWithOrchestration(
+  StandardSyncOrchestration(),
+);
+
+// Strict: Throws immediately, puts responsibility on you
+try {
+  final metrics = await engine.syncWithOrchestration(
+    StrictManualOrchestration(),
+  );
+} on SyncError catch (e) {
+  // YOU decide how to handle this
+}
+```
+
+---
+
+### 5. **CompositeSyncOrchestration** (Pipelines)
+
+Chain multiple strategies and lifecycle hooks together to build complex workflows.
 
 ```dart
 final pipeline = CompositeSyncOrchestration([
-  PreSyncValidationHook(),       // e.g., check disk space or auth token validity
-  StandardSyncOrchestration(),   // The actual push/pull data sync
-  PostSyncAnalyticsHook(),       // e.g., flush metrics to Datadog/Sentry
+  // Phase 1: Pre-sync validation
+  CustomHook(
+    beforeSync: () async {
+      // Check disk space
+      final space = await getDiskFreeSpace();
+      if (space < 100 * 1024 * 1024) {
+        throw InsufficientStorageError();
+      }
+      
+      // Validate auth token
+      if (!await isAuthTokenValid()) {
+        throw AuthenticationError();
+      }
+      
+      // Pause background tasks
+      await backgroundTaskManager.pauseAll();
+    },
+  ),
+  
+  // Phase 2: The actual sync (with priorities)
+  PrioritySyncOrchestration({
+    'users': 100,
+    'subscriptions': 90,
+    'messages': 70,
+    'analytics': 10,
+  }),
+  
+  // Phase 3: Post-sync analytics
+  CustomHook(
+    afterSync: (metrics) async {
+      // Upload metrics to analytics backend
+      await analyticsService.reportSync(metrics);
+      
+      // Trigger dependent operations
+      await indexSearchDatabase();
+      await preloadCriticalImages();
+      
+      // Resume background tasks
+      await backgroundTaskManager.resumeAll();
+      
+      // Notify listeners
+      notificationService.notifyApp('Sync complete!');
+    },
+  ),
 ]);
 
-final metrics = await engine.syncWithOrchestration(pipeline);
+final result = await engine.syncWithOrchestration(pipeline);
 ```
 
-### Strict Manual Orchestration
+**Creating Custom Hooks:**
+```dart
+class CustomHook extends SyncOrchestrationStrategy {
+  final Future<void> Function()? beforeSync;
+  final Future<void> Function(SyncSessionMetrics)? afterSync;
+  
+  CustomHook({this.beforeSync, this.afterSync});
+  
+  @override
+  Future<SyncSessionMetrics> execute(SyncEngine engine) async {
+    // Run pre-sync hook
+    if (beforeSync != null) {
+      await beforeSync!();
+    }
+    
+    // Do the actual sync
+    final metrics = await StandardSyncOrchestration().execute(engine);
+    
+    // Run post-sync hook
+    if (afterSync != null) {
+      await afterSync!(metrics);
+    }
+    
+    return metrics;
+  }
+}
+```
 
-For highly sensitive operations where automated retries are dangerous. Every error surfaces immediately to the caller, giving the UI or the background service explicit control over how to handle the failure.
+**When to use:**
+- Complex multi-phase sync workflows
+- Need pre-sync validation or setup
+- Need post-sync cleanup or analytics
+- Want to implement custom strategies
+
+---
+
+## 🎯 Orchestration Strategy Comparison Matrix
+
+| Feature | Standard | OfflineFirst | Strict | Priority | Composite |
+|---------|----------|--------------|--------|----------|-----------|
+| **Auto Retry** | Yes (5x) | Yes, limited | No | Yes | Configurable |
+| **Table Priority** | Equal | Equal | Equal | **Configurable** | Via nesting |
+| **Network Tolerance** | Low | **High** | None | Medium | Custom |
+| **Error Behavior** | Log & continue | Graceful backoff | Throw immediately | Tiered fail-fast | Custom hooks |
+| **Lifecycle Hooks** | No | No | No | No | **Yes** |
+| **Complexity** | Low | Low | Low | Medium | **High** |
+| **Best For** | Most apps | Field service | Compliance | Enterprise | Complex pipelines |
+
+---
+
+## 📋 Decision Tree: Choosing the Right Strategy
+
+```
+Start: Choosing your sync strategy?
+  │
+  ├─ Do you need pre/post-sync hooks?
+  │  └─ YES → CompositeSyncOrchestration
+  │  └─ NO → Continue
+  │
+  ├─ Is automatic retry dangerous?
+  │  └─ YES → StrictManualOrchestration
+  │  └─ NO → Continue
+  │
+  ├─ Are some tables more important than others?
+  │  └─ YES → PrioritySyncOrchestration
+  │  └─ NO → Continue
+  │
+  ├─ Do you work in low-connectivity environments?
+  │  └─ YES → OfflineFirstSyncOrchestration
+  │  └─ NO → StandardSyncOrchestration (DEFAULT)
+```
+
+---
+
+## 🏗️ Real-World Use Cases
+
+### Use Case 1: Healthcare Platform
+**Challenge**: Patient records (PII) must not auto-merge. Strict audit trail required.
 
 ```dart
+final healthcarePipeline = CompositeSyncOrchestration([
+  CustomHook(
+    beforeSync: () async {
+      // Validate HIPAA compliance
+      await hipaaComplianceManager.validateSyncEnv();
+    },
+  ),
+  StrictManualOrchestration(
+    throwOnError: true,  // Never silent failures
+  ),
+  CustomHook(
+    afterSync: (metrics) async {
+      // Log every sync for compliance
+      await auditLog.recordSync(metrics);
+    },
+  ),
+]);
+
+final result = await engine.syncWithOrchestration(healthcarePipeline);
+```
+
+### Use Case 2: Field Service (Delivery/Technicians)
+**Challenge**: Drivers work offline frequently. Battery-critical. Graceful degradation needed.
+
+```dart
+final fieldServiceConfig = OfflineFirstSyncOrchestration(
+  maxNetworkErrors: 8,    // Very tolerant
+  backoffMultiplier: 2.0, // Exponential backoff
+  maxBackoffDuration: Duration(minutes: 5),
+);
+
+// Wrap in composite for pre-sync setup
+final fieldServicePipeline = CompositeSyncOrchestration([
+  CustomHook(
+    beforeSync: () async {
+      // Reduce update frequency to save battery
+      await wifiManager.reduceUpdateFrequency();
+      await backgroundTaskManager.pause();
+    },
+  ),
+  fieldServiceConfig,
+  CustomHook(
+    afterSync: (metrics) async {
+      // Resume after sync complete
+      await backgroundTaskManager.resume();
+    },
+  ),
+]);
+```
+
+### Use Case 3: E-commerce Platform
+**Challenge**: Order-related data is critical and must sync first. Recommendations are nice-to-have.
+
+```dart
+final ecommercePipeline = CompositeSyncOrchestration([
+  CustomHook(
+    beforeSync: () async {
+      // Clear stale cache
+      await cacheManager.clearExpiredEntries();
+    },
+  ),
+  PrioritySyncOrchestration({
+    'users': 100,           // Identity data
+    'accounts': 95,         // Payment info
+    'orders': 90,           // Core business
+    'order_items': 88,      // Order details
+    'inventory': 85,        // Stock
+    'reviews': 50,          // Social features
+    'recommendations': 20,  // AI/ML
+  }),
+  CustomHook(
+    afterSync: (metrics) async {
+      // Recompute recommendations
+      await recommendationEngine.refresh();
+      
+      // Update inventory UI
+      notifyInventoryUpdated();
+      
+      // Log to analytics
+      await analytics.logSync(metrics);
+    },
+  ),
+]);
+```
+
+### Use Case 4: Financial Application
+**Challenge**: Transactions cannot auto-retry. Every error must be logged and verified.
+
+```dart
+final financialPipeline = CompositeSyncOrchestration([
+  StrictManualOrchestration(throwOnError: true),
+  CustomHook(
+    afterSync: (metrics) async {
+      // Verify transaction integrity
+      await transactionValidator.validateAll();
+      
+      // Log for compliance
+      await complianceLog.record(
+        syncTime: DateTime.now(),
+        recordsProcessed: metrics.recordsPushed + metrics.recordsPulled,
+        conflicts: metrics.conflicts,
+      );
+      
+      // Notify finance team of anomalies
+      if (metrics.conflicts > 0) {
+        await notifyFinanceTeam(metrics.conflicts);
+      }
+    },
+  ),
+]);
+```
+
+---
+
+## 🛠️ Implementing Custom Orchestration Strategies
+
+For truly unique workflows, implement the `SyncOrchestrationStrategy` interface directly:
+
+```dart
+class CustomRetryOrchestration implements SyncOrchestrationStrategy {
+  final int maxRetries;
+  final Duration initialDelay;
+  final double exponentialBase;
+  
+  CustomRetryOrchestration({
+    this.maxRetries = 5,
+    this.initialDelay = const Duration(seconds: 1),
+    this.exponentialBase = 2.0,
+  });
+  
+  @override
+  Future<SyncSessionMetrics> execute(SyncEngine engine) async {
+    int attempt = 0;
+    Duration delay = initialDelay;
+    
+    while (attempt < maxRetries) {
+      try {
+        // Attempt sync
+        return await engine.pushAll()
+            .then((_) => engine.pullAll());
+      } on NetworkError {
+        attempt++;
+        if (attempt >= maxRetries) rethrow;
+        
+        // Exponential backoff
+        await Future.delayed(delay);
+        delay = Duration(
+          milliseconds: (delay.inMilliseconds * exponentialBase).toInt(),
+        );
+      }
+    }
+    
+    throw SyncError('Max retries exceeded');
+  }
+}
+
+// Usage
 final metrics = await engine.syncWithOrchestration(
+  CustomRetryOrchestration(maxRetries: 10),
+);
+```
+
+---
+
+## 🔗 Orchestration Lifecycle Hooks
+
+Every orchestration strategy has access to lifecycle hooks:
+
+```dart
+class AdvancedCustomOrchestration extends SyncOrchestrationStrategy {
+  @override
+  Future<SyncSessionMetrics> execute(SyncEngine engine) async {
+    final startTime = DateTime.now();
+    
+    try {
+      // BEFORE SYNC: Prepare
+      await onBeforeSync(engine);
+      
+      // DURING SYNC: Execute
+      final metrics = await engine.pushAll()
+          .then((_) => engine.pullAll());
+      
+      // AFTER SYNC (SUCCESS): Finalize
+      await onAfterSyncSuccess(engine, metrics);
+      
+      return metrics;
+    } on SyncError catch (e) {
+      // AFTER SYNC (ERROR): Handle failure
+      await onAfterSyncError(engine, e);
+      rethrow;
+    } finally {
+      // CLEANUP: Always runs
+      final duration = DateTime.now().difference(startTime);
+      await onSyncComplete(duration);
+    }
+  }
+  
+  Future<void> onBeforeSync(SyncEngine engine) async {
+    // Override in subclass
+  }
+  
+  Future<void> onAfterSyncSuccess(
+    SyncEngine engine,
+    SyncSessionMetrics metrics,
+  ) async {
+    // Override in subclass
+  }
+  
+  Future<void> onAfterSyncError(SyncEngine engine, SyncError error) async {
+    // Override in subclass
+  }
+  
+  Future<void> onSyncComplete(Duration duration) async {
+    // Override in subclass
+  }
+}
+```
+
+---
+
+## ✅ Testing Orchestration Strategies
+
+```dart
+void main() {
+  group('CustomOrchestration', () {
+    late MockSyncEngine mockEngine;
+    
+    setUp(() {
+      mockEngine = MockSyncEngine();
+    });
+    
+    test('retries on transient error', () async {
+      // Setup mocks
+      when(mockEngine.pushAll())
+          .thenThrow(NetworkError('timeout'))  // First call fails
+          .thenReturn(SyncSessionMetrics());   // Second call succeeds
+      
+      final orchestration = CustomRetryOrchestration(maxRetries: 2);
+      final metrics = await orchestration.execute(mockEngine);
+      
+      expect(metrics, isNotNull);
+      verify(mockEngine.pushAll()).called(2);  // Called twice
+    });
+    
+    test('respects max retry limit', () async {
+      when(mockEngine.pushAll())
+          .thenThrow(NetworkError('timeout'));
+      
+      final orchestration = CustomRetryOrchestration(maxRetries: 3);
+      
+      expect(
+        () => orchestration.execute(mockEngine),
+        throwsA(isA<SyncError>()),
+      );
+      
+      verify(mockEngine.pushAll()).called(3);  // Failed 3 times, then gives up
+    });
+  });
+}
+```
+
+---
+
+## Integration with Flutter Lifecycle
+
+Orchestration strategies should respect app lifecycle events:
+
+```dart
+class LifecycleAwareOrchestration extends SyncOrchestrationStrategy {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: WidgetsBindingObserver(
+        didChangeAppLifecycleState: (state) async {
+          switch (state) {
+            case AppLifecycleState.paused:
+              // App backgrounded; stop heavy sync operations
+              await engine.pauseSyncOrchestration();
+              break;
+            case AppLifecycleState.resumed:
+              // App foregrounded; resume or start fresh sync
+              await engine.resumeSyncOrchestration();
+              break;
+            case AppLifecycleState.detached:
+              // App closed; cleanup
+              await engine.stopSyncOrchestration();
+              break;
+            default:
+              break;
+          }
+        },
+        child: YourApp(),
+      ),
+    );
+  }
+}
+```
+
+This allows orchestrations to adjust behavior based on whether the app is in the foreground (aggressive sync) or background (conservative, battery-friendly sync).
+
+---
+
+## Key Takeaways
+
+✅ **Standard**: Default, works for most apps  
+✅ **PrioritySyncOrchestration**: Enterprise with hierarchical data  
+✅ **OfflineFirstSyncOrchestration**: Field service, unreliable networks  
+✅ **StrictManualOrchestration**: Compliance, payment, healthcare  
+✅ **CompositeSyncOrchestration**: Complex workflows with hooks  
+✅ **Custom**: Implement `SyncOrchestrationStrategy` for unique needs
+
+Choose based on your data dependencies, network reliability, and error tolerance! 🚀
+
+
   StrictManualOrchestration(),
 );
 ```

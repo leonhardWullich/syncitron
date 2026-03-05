@@ -5,7 +5,191 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.4.0] - 2026-03-10 (Multi-Engine Management & UI Helpers)
+## [0.5.0]
+
+### Added
+
+#### New LocalStore Implementations
+
+Replicore now supports multiple persistence layers with specialized implementations:
+
+- **DriftStore** - Drift (typed SQLite) integration
+  - Compile-time type safety via Drift code generation
+  - Seamless integration with existing Drift databases
+  - Metadata stored alongside application data
+  - Perfect for complex schema requirements
+  - Customizable via queryBuilder/mutationBuilder callbacks
+
+- **HiveStore** - Hive (embeddable NoSQL) integration
+  - Lightweight, pure-Dart implementation with zero dependencies
+  - Ideal for simpler sync scenarios without complex querying
+  - Automatic box management and caching
+  - Fast key-value operations with on-demand serialization
+  - No schema definition needed (schema-less)
+
+- **IsarStore** - Isar (Rust-based embedded database) integration
+  - High-performance, type-safe embedded database
+  - Built-in indexing and powerful querying
+  - Excellent performance characteristics
+  - Suitable for large datasets and complex queries
+  - Supports batch operations and transactions
+
+#### New RemoteAdapter Implementations
+
+Expand your sync capabilities with built-in adapters for popular backends:
+
+- **FirebaseFirestoreAdapter** - Google Firebase Firestore
+  - Real-time listener support via watchCollection()
+  - Batch write operations with Firebase batch API
+  - Transaction support for atomic multi-document updates
+  - Offline persistence via Firestore's native feature
+  - Document references and nested data support
+
+- **AppwriteAdapter** - Appwrite Backend-as-a-Service
+  - Self-hosted or managed Appwrite deployments
+  - Custom function execution for complex server-side logic
+  - Real-time collection watching via WebSocket
+  - Batch operations support (create/update/delete multiple)
+  - Database and collection ID configuration
+
+- **GraphQLAdapter** - Universal GraphQL Support
+  - Works with any GraphQL backend (Hasura, Apollo, Supabase GraphQL, etc.)
+  - Custom query and mutation builders for maximum flexibility
+  - GraphQL subscription support for real-time updates
+  - Advanced query/mutation execution for complex scenarios
+  - Idempotency key support for safe retries
+
+#### Real-Time Subscriptions (NEW!)
+
+Replicore now supports **real-time event-driven syncing** without polling:
+
+- **RealtimeSubscriptionManager** - Centralized real-time subscription handling
+  - Automatic real-time change detection from backend
+  - Targeted pulls for affected tables only (no full re-sync)
+  - Configurable debouncing to prevent sync storms
+  - Auto-reconnection with exponential backoff
+  - Connection status tracking and monitoring
+
+- **RealtimeSubscriptionConfig** - Fine-grained configuration
+  - Enable/disable real-time per table
+  - Auto-sync toggle (can listen without auto-pulling)
+  - Configurable debounce durations
+  - Reconnection strategies and timeouts
+  - Production, Development, and Disabled presets
+
+- **Firebase Firestore Real-Time Support**
+  - Real-time listeners on collections
+  - Detects insert, update, and delete operations
+  - Automatic sync triggered on changes
+  - Connection resilience and auto-reconnect
+
+**Usage Example:**
+```dart
+import 'package:replicore/replicore.dart';
+
+// Create engine (same as before)
+final engine = SyncEngine(...);
+await engine.init();
+
+// Create real-time manager
+final realtimeProvider = adapter.getRealtimeProvider();
+if (realtimeProvider != null) {
+  final realtimeManager = RealtimeSubscriptionManager(
+    config: RealtimeSubscriptionConfig.production(),
+    provider: realtimeProvider,
+    engine: engine,
+    logger: logger,
+  );
+
+  // Initialize real-time listening
+  await realtimeManager.initialize();
+
+  // Now, when remote data changes:
+  // 1. Real-time event arrives
+  // 2. Replicore detects the change
+  // 3. Only the affected table syncs (not all tables)
+  // 4. UI updates automatically
+
+  // Clean up on app exit
+  await realtimeManager.close();
+}
+```
+
+**Benefits:**
+- ⚡ **Instant Updates**: Changes appear immediately without waiting for sync interval
+- 📱 **Battery Friendly**: No polling; only syncs when changes occur
+- 🎯 **Efficient**: Updates only affected tables, not entire database
+- 🔄 **Resilient**: Auto-reconnects on network failures
+- 📊 **Monitorable**: Track connection status and sync events
+
+### Improved
+
+#### Refactored Custom Persistence Integration
+
+- **Simplified LocalStore Interface**: Cleaner abstraction for implementing custom stores
+  - Direct inheritance without complex base logic
+  - Clear method signatures with comprehensive documentation
+  - Example implementations in source code
+
+- **RemoteAdapter Standardization**: Consistent interface across all adapters
+  - Common error handling patterns via RemoteAdapterException
+  - Network timeout handling with configurable durations
+  - Idempotency key support for idempotent operations
+  - Optional `getRealtimeProvider()` for real-time support
+
+- **Better Documentation**: Extensive docstrings and setup examples
+  - Each adapter includes complete example setup code
+  - LocalStore implementations show custom factory patterns
+  - Real-world use case examples for each backend
+
+### Documentation
+
+- Added comprehensive Drift integration guide to README
+- Added Hive integration guide for lightweight scenarios
+- Added Isar integration guide for high-performance deployments
+- Added Firebase Firestore real-time features documentation
+- Added Appwrite deployment options documentation
+- Added GraphQL backend compatibility matrix
+- Migration guide for switching between persistence layers
+
+### Breaking Changes
+
+None. This release is fully backward compatible with 0.4.0.
+
+### Migration Guide
+
+To upgrade from v0.4.0 to v0.5.0:
+
+1. Update pubspec.yaml dependency
+2. Run `flutter pub get`
+3. No code changes required - existing Supabase + Sqflite configs continue working
+
+To opt-in to new features:
+
+```dart
+// Use Drift instead of Sqflite
+final store = DriftStore(
+  tables: yourDriftTables,
+  readMetadataQuery: (key) => database.readMeta(key),
+  writeMetadataQuery: (key, value) => database.writeMeta(key, value),
+  deleteMetadataQuery: (key) => database.deleteMeta(key),
+);
+
+// Or use Hive for lightweight scenarios
+final hiveBox = await Hive.openBox('replicore_sync');
+final store = HiveStore(
+  metadataBox: hiveBox,
+  dataBoxFactory: (table) => Hive.openBox(table),
+);
+
+// Or use Firebase Firestore adapter
+final adapter = FirebaseFirestoreAdapter(
+  firestore: FirebaseFirestore.instance,
+  localStore: store,
+);
+```
+
+## [0.4.0]
 
 ### Added
 
@@ -65,7 +249,7 @@ New Flutter widgets for seamless sync UI integration:
 
 ---
 
-## [0.3.0] - 2026-03-08 (Custom Sync Strategies & API Cleanup)
+## [0.3.0]
 
 ### Removed
 
@@ -161,7 +345,7 @@ SyncEngine(..., logger: ConsoleLogger())
 
 ---
 
-## [0.2.0] - 2026-03-05 (Enterprise Release)
+## [0.2.0]
 
 ### Added
 
@@ -273,11 +457,6 @@ New UI widgets available; no breaking changes.
 
 ---
 
-## Planned Features (Roadmap)
-
-- v0.5.0: Advanced conflict resolution, custom persistence layers
-- v1.0.0: Stable public API, enterprise support SLA
-
 ### Added
 
 #### New Enterprise Features
@@ -355,7 +534,7 @@ New UI widgets available; no breaking changes.
 - Error handling patterns
 - Custom adapter implementation guide
 
-## [0.1.0] - 2024-12-20 (Initial Release)
+## [0.1.0]
 
 ### Added
 
@@ -437,11 +616,6 @@ SyncEngine(
 ---
 
 ## Planned Features (Roadmap)
-
-[0.5.0] - Ecosystem Expansion
-- New LocalStores: Support for Drift (typed SQLite) and NoSQL options like Hive or Isar.
-- New RemoteAdapters: Built-in adapters for Firebase Firestore, Appwrite, and generic GraphQL.
-- Refactoring of custom persistence layers for easier integration.
 
 [0.6.0] - Realtime & Background Sync
 - Realtime Subscriptions: Listen to remote backend changes (e.g., Supabase/Firebase realtime events) to trigger immediate targeted pulls without polling.

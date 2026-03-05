@@ -129,6 +129,9 @@ class MockRemoteAdapter implements RemoteAdapter {
   bool throwOnUpsert = false;
 
   @override
+  RealtimeSubscriptionProvider? getRealtimeProvider() => null;
+
+  @override
   Future<PullResult> pull(PullRequest request) async {
     if (throwOnPull) {
       throw SyncNetworkException(

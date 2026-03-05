@@ -67,12 +67,23 @@ export 'src/core/sync_engine.dart';
 export 'src/core/sync_strategy.dart';
 export 'src/core/sync_orchestration_strategy.dart';
 export 'src/core/table_config.dart';
+export 'src/core/realtime_subscription.dart';
 
 export 'src/adapters/remote_adapter.dart';
 export 'src/adapters/supabase_adapter.dart';
+export 'src/adapters/supabase_realtime.dart';
+export 'src/adapters/firebase_firestore_adapter.dart';
+export 'src/adapters/firebase_firestore_realtime.dart';
+export 'src/adapters/appwrite_adapter.dart';
+export 'src/adapters/appwrite_realtime.dart';
+export 'src/adapters/graphql_adapter.dart';
+export 'src/adapters/graphql_realtime.dart';
 
 export 'src/storage/local_store.dart';
 export 'src/storage/sqflite_store.dart';
+export 'src/storage/drift_store.dart';
+export 'src/storage/hive_store.dart';
+export 'src/storage/isar_store.dart';
 
 export 'src/ui/sync_widgets.dart';
 
