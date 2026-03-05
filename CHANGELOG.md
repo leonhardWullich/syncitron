@@ -127,7 +127,7 @@ New extensible strategy system for domain-specific sync logic:
 #### Usage Example
 
 ```dart
-final metrics = await engine.syncWithStrategy(
+final metrics = await engine.syncWithOrchestration(
   OfflineFirstSyncStrategy(maxNetworkErrors: 3),
 );
 ```
@@ -136,7 +136,7 @@ final metrics = await engine.syncWithStrategy(
 
 #### SyncEngine
 
-- New `syncWithStrategy(SyncOrchestrationStrategy)` method
+- New `syncWithOrchestration(SyncOrchestrationStrategy)` method
 - Maintains backward compatibility with `syncAll()`
 - Improved documentation
 
@@ -438,7 +438,16 @@ SyncEngine(
 
 ## Planned Features (Roadmap)
 
-- v0.3.0: Remove deprecated APIs, custom sync strategies
-- v0.4.0: Multi-engine management, UI helpers
-- v1.0.0: Stable public API, enterprise support
+[0.5.0] - Ecosystem Expansion
+- New LocalStores: Support for Drift (typed SQLite) and NoSQL options like Hive or Isar.
+- New RemoteAdapters: Built-in adapters for Firebase Firestore, Appwrite, and generic GraphQL.
+- Refactoring of custom persistence layers for easier integration.
 
+[0.6.0] - Realtime & Background Sync
+- Realtime Subscriptions: Listen to remote backend changes (e.g., Supabase/Firebase realtime events) to trigger immediate targeted pulls without polling.
+- Background Sync: Integration with OS background execution (e.g., via workmanager) to sync data while the app is closed or in the background.
+
+[1.0.0] - Enterprise Stable & Performance
+- Isolate Offloading: Move heavy JSON parsing and data merging to background isolates to guarantee 60/120fps UI performance during massive initial syncs.
+- Relational Integrity: Advanced support for syncing complex parent-child relationships and maintaining foreign key constraints across devices.
+- Delta Updates: Partial row syncing (only uploading changed columns) to save bandwidth.

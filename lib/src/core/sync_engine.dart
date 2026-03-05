@@ -202,14 +202,14 @@ class SyncEngine {
   ///
   /// Example:
   /// ```dart
-  /// final metrics = await engine.syncWithStrategy(
+  /// final metrics = await engine.syncWithOrchestration(
   ///   OfflineFirstSyncStrategy(),
   /// );
   /// ```
   ///
   /// Throws [ReplicoreException] subclasses on failure.
   /// Returns metrics for the entire sync session.
-  Future<SyncSessionMetrics> syncWithStrategy(
+  Future<SyncSessionMetrics> syncWithOrchestration(
     SyncOrchestrationStrategy strategy,
   ) async {
     if (_isSyncing) {

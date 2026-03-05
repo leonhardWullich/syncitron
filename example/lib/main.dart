@@ -15,11 +15,8 @@ Future<void> main() async {
   // IMPORTANT: Run the setup in example/supabase_setup.md to create the tables
   // or provide the required credentials below.
   await Supabase.initialize(
-    url: const String.fromEnvironment('SUPABASE_URL',
-        defaultValue: 'https://eymcvxrloanvjapoogkh.supabase.co'),
-    anonKey: const String.fromEnvironment('SUPABASE_ANON_KEY',
-        defaultValue:
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV5bWN2eHJsb2FudmphcG9vZ2toIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI2MzM3ODEsImV4cCI6MjA4ODIwOTc4MX0.Coe-WYoXPsf88Xwy4ZIgRyrA0w4nq9Mm1bC5VrCc1lI'),
+    url: 'SUPABASE_URL',
+    anonKey: 'SUPABASE_ANON_KEY',
   );
 
   // ── 2. Open Local SQLite Database ──────────────────────────────────────────

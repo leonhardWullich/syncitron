@@ -309,6 +309,59 @@ TableConfig(
 )
 ```
 
+## 🎼 Sync Orchestration (Macro-Level Flow)
+
+While Conflict Resolution handles row-level data merges (`SyncStrategy`), the **SyncOrchestrationStrategy** controls the macro-level flow of your synchronization process. 
+
+In enterprise environments, you rarely want to treat all tables equally during a sync. You need fine-grained control over execution order, fault tolerance, and lifecycle hooks (e.g., pre-sync validation or post-sync analytics). Replicore allows you to orchestrate the entire sync lifecycle.
+
+### Priority-Based Orchestration
+Ensures critical business data is synchronized first and fails-fast on errors, while optional data gracefully degrades on poor connections.
+
+```dart
+final metrics = await engine.syncWithOrchestration(
+  PrioritySyncOrchestration({
+    'users': 100,        // Critical: Syncs first, fails fast on error
+    'subscriptions': 90, 
+    'cache_assets': 10,  // Optional: Tolerates network errors and skips gracefully
+  }),
+);
+```
+
+### Offline-First Orchestration
+
+Designed for field-service apps or environments with unreliable networks (e.g., edge computing, emerging markets). It tolerates a specific number of network timeouts before cleanly aborting the sync loop, preventing infinite retries and battery drain.
+
+```dart
+final metrics = await engine.syncWithOrchestration(
+  OfflineFirstSyncOrchestration(maxNetworkErrors: 3),
+);
+```
+
+### Composite Orchestration (Pipelines)
+
+Enterprise architectures often require complex sync pipelines. You can chain multiple strategies together to create custom workflows with pre- and post-processing hooks.
+
+```dart
+final pipeline = CompositeSyncOrchestration([
+  PreSyncValidationHook(),       // e.g., check disk space or auth token validity
+  StandardSyncOrchestration(),   // The actual push/pull data sync
+  PostSyncAnalyticsHook(),       // e.g., flush metrics to Datadog/Sentry
+]);
+
+final metrics = await engine.syncWithOrchestration(pipeline);
+```
+
+### Strict Manual Orchestration
+
+For highly sensitive operations where automated retries are dangerous. Every error surfaces immediately to the caller, giving the UI or the background service explicit control over how to handle the failure.
+
+```dart
+final metrics = await engine.syncWithOrchestration(
+  StrictManualOrchestration(),
+);
+```
+
 ## 📊 Monitoring & Observability
 
 ### Sync Metrics
