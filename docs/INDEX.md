@@ -160,6 +160,18 @@ Example README: [Example App Walkthrough](../example/README.md)
   - Error handling strategies
   - Testing patterns
 
+#### [Sync Orchestration Strategy](./24_SYNC_ORCHESTRATION_STRATEGY.md) ⭐ **NEW**
+- **Target Audience**: Advanced developers, architecture teams
+- **Purpose**: Custom synchronization workflows
+- **Topics**:
+  - SyncOrchestrationStrategy interface
+  - Built-in strategies (Standard, OfflineFirst, StrictManual, Priority, Composite)
+  - Creating custom orchestrations
+  - Priority-based syncing
+  - Error recovery patterns
+  - Pre/post-sync hooks
+  - Advanced patterns (timeout, queue-based, selective)
+
 #### [Real-Time Synchronization](./19_REALTIME_SUBSCRIPTIONS.md) ⭐ **REORGANIZED**
 - **Target Audience**: All developers
 - **Purpose**: Event-driven sync setup
@@ -361,7 +373,7 @@ Read in order: All documentation from top to bottom
 | Getting Started | 2 | 10 |
 | Architecture | 2 | 15 |
 | Integration Guides | 9 | 50 |
-| Patterns | 2 | 15 |
+| Patterns | 3 | 25 |
 | Performance | 1 | 20 |
 | Real-Time | 1 | 15 |
 | Enterprise | 1 | 20 |
@@ -369,7 +381,7 @@ Read in order: All documentation from top to bottom
 | Migration | 1 | 10 |
 | Troubleshooting | 2 | 15 |
 | Ecosystem | 2 | 5 |
-| **TOTAL** | **27** | **200+** |
+| **TOTAL** | **28** | **215+** |
 
 ---
 

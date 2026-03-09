@@ -519,26 +519,57 @@ final engine = SyncEngine(
 
 ---
 
-## 🎨 Event System
+## 🎨 Status Monitoring
 
-All sync events can be monitored:
+Monitor sync progress and status updates:
 
 ```dart
-engine.onSyncStart.listen((event) {
-  print('Sync started for ${event.table}');
+// Listen to all sync status updates
+engine.statusStream.listen((status) {
+  print('Sync status: $status');
 });
 
-engine.onSyncComplete.listen((result) {
-  print('Synced ${result.recordsPushed} records');
-});
+// Example output:
+// "Starting Full Sync..."
+// "Syncing users..."
+// "Syncing todos..."
+// "Error syncing todos."
+// "Sync complete"
+```
 
-engine.onSyncError.listen((error) {
-  print('Sync failed: ${error.message}');
-});
+For detailed metrics after sync completes, use the returned `SyncSessionMetrics`:
 
-engine.onConflict.listen((conflict) {
-  print('Conflict on ${conflict.table}');
-});
+```dart
+final metrics = await engine.syncAll();
+
+print('Overall success: ${metrics.overallSuccess}');
+print('Records pulled: ${metrics.totalRecordsPulled}');
+print('Records pushed: ${metrics.totalRecordsPushed}');
+print('Conflicts: ${metrics.conflictsEncountered}');
+print('Duration: ${metrics.duration.inSeconds}s');
+
+// Per-table metrics
+for (final tableMetrics in metrics.metrics) {
+  print('${tableMetrics.tableName}:');
+  print('  - Pulled: ${tableMetrics.recordsPulled}');
+  print('  - Pushed: ${tableMetrics.recordsPushed}');
+  print('  - Duration: ${tableMetrics.duration.inMilliseconds}ms');
+  print('  - Conflicts: ${tableMetrics.conflicts}');
+}
+```
+
+For detailed event tracking and custom logging, use structured logger integration:
+
+```dart
+// Configure with structured logging
+final engine = SyncEngine(
+  localStore: store,
+  remoteAdapter: adapter,
+  logger: ConsoleLogger(), // Or custom logger
+);
+
+// Logger receives all sync events automatically
+// with structured context like table names, record counts, etc.
 ```
 
 ---

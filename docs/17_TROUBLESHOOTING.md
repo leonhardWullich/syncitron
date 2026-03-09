@@ -21,24 +21,26 @@ final engine = SyncEngine(
 );
 ```
 
-### Step 2: Check Error Stream
+### Step 2: Monitor Status & Errors
 
 ```dart
-engine.onSyncError.listen((error) {
-  print('❌ Error Type: ${error.runtimeType}');
-  print('❌ Message: ${error.message}');
-  print('❌ Stack: ${error.stackTrace}');
+// Monitor all status updates
+engine.statusStream.listen((status) {
+  print('📊 Status: $status');
 });
-```
 
-### Step 3: Check Sync Status
-
-```dart
-engine.onSyncComplete.listen((result) {
-  print('✅ Pulled: ${result.recordsPulled}');
-  print('✅ Pushed: ${result.recordsPushed}');
-  print('✅ Duration: ${result.duration.inMilliseconds}ms');
-});
+// Check detailed metrics after sync
+try {
+  final metrics = await engine.syncAll();
+  print('✅ Pulled: ${metrics.totalRecordsPulled}');
+  print('✅ Pushed: ${metrics.totalRecordsPushed}');
+  print('✅ Duration: ${metrics.duration.inMilliseconds}ms');
+  print('✅ Success: ${metrics.overallSuccess}');
+} on ReplicoreException catch (e) {
+  print('❌ Error Type: ${e.runtimeType}');
+  print('❌ Message: ${e.message}');
+  print('❌ Stack: ${e.stackTrace}');
+}
 ```
 
 ---
@@ -139,13 +141,16 @@ if (dirty.isEmpty) {
   // Make sure you're calling writeLocal
 }
 
-// 2. Check if sync was called
-engine.onSyncStart.listen((_) {
-  print('✅ Sync started');
+// 2. Monitor sync status
+engine.statusStream.listen((status) {
+  if (status.contains('Syncing')) {
+    print('✅ Sync in progress');
+  }
 });
 
 // 3. Verify changes are local first
 final todo = await engine.readLocal('todos', '1');
+```
 if (todo != null) {
   print('✅ Data in local storage: $todo');
 } else {

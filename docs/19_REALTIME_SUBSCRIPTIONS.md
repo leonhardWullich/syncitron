@@ -201,13 +201,23 @@ adapter.subscribe(table: 'todos')?.listen((change) {
   print('Real-time: ${change.operation}');
   
   // Trigger sync to pull latest
-  engine.sync(table: 'todos');
+  engine.syncTable('todos');
+  
+  // Rebuild UI if using Flutter
+  if (mounted) {
+    setState(() {});
+  }
 });
 
-// Update UI when data changes
-engine.onDataChanged.listen((change) {
-  setState(() {});
+// Also monitor general sync status
+engine.statusStream.listen((status) {
+  if (status.contains('complete')) {
+    if (mounted) {
+      setState(() {}); // Refresh after sync completes
+    }
+  }
 });
+```
 ```
 
 ---
@@ -253,9 +263,11 @@ void initState() {
   super.initState();
   realTimeManager.connect(adapter);
   
-  // Listen for changes
-  engine.onDataChanged.listen((_) {
-    setState(() {});
+  // Listen for sync status changes
+  engine.statusStream.listen((status) {
+    if (mounted) {
+      setState(() {}); // Rebuild on sync updates
+    }
   });
 }
 
@@ -454,17 +466,21 @@ class _TodoListState extends State<TodoList> {
     // Load initial data
     _loadTodos();
     
-    // Listen for changes
-    engine.onDataChanged.listen((_) {
-      _loadTodos();
+    // Listen for sync status changes to reload data
+    engine.statusStream.listen((status) {
+      if (status.contains('complete')) {
+        _loadTodos();
+      }
     });
   }
   
   Future<void> _loadTodos() async {
     final loaded = await engine.readLocalWhere('todos');
-    setState(() {
-      todos = loaded.cast<Todo>();
-    });
+    if (mounted) {
+      setState(() {
+        todos = loaded.cast<Todo>();
+      });
+    }
   }
   
   @override

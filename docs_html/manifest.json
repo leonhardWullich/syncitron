@@ -1,0 +1,191 @@
+{
+  "title": "Replicore Documentation",
+  "version": "0.5.1",
+  "generated": "2026-03-09T12:43:51.744963",
+  "documents": [
+    {
+      "path": "docs/01_GETTING_STARTED.md",
+      "name": "01 GETTING STARTED",
+      "filename": "01_GETTING_STARTED.md",
+      "title": "Getting Started with Replicore"
+    },
+    {
+      "path": "docs/02_ARCHITECTURE.md",
+      "name": "02 ARCHITECTURE",
+      "filename": "02_ARCHITECTURE.md",
+      "title": "Architecture Overview"
+    },
+    {
+      "path": "docs/03_SYNC_CONCEPTS.md",
+      "name": "03 SYNC CONCEPTS",
+      "filename": "03_SYNC_CONCEPTS.md",
+      "title": "Synchronization Concepts Deep Dive"
+    },
+    {
+      "path": "docs/04_CONFLICT_RESOLUTION.md",
+      "name": "04 CONFLICT RESOLUTION",
+      "filename": "04_CONFLICT_RESOLUTION.md",
+      "title": "Conflict Resolution Deep Dive"
+    },
+    {
+      "path": "docs/05_BACKEND_SQFLITE.md",
+      "name": "05 BACKEND SQFLITE",
+      "filename": "05_BACKEND_SQFLITE.md",
+      "title": "Backend Integration: SQLite (Sqflite) \u2b50 Recommended"
+    },
+    {
+      "path": "docs/06_BACKEND_FIREBASE.md",
+      "name": "06 BACKEND FIREBASE",
+      "filename": "06_BACKEND_FIREBASE.md",
+      "title": "Backend Integration: Firebase Firestore"
+    },
+    {
+      "path": "docs/07_BACKEND_SUPABASE.md",
+      "name": "07 BACKEND SUPABASE",
+      "filename": "07_BACKEND_SUPABASE.md",
+      "title": "Backend Integration: Supabase (PostgreSQL)"
+    },
+    {
+      "path": "docs/08_BACKEND_APPWRITE.md",
+      "name": "08 BACKEND APPWRITE",
+      "filename": "08_BACKEND_APPWRITE.md",
+      "title": "Backend Integration: Appwrite"
+    },
+    {
+      "path": "docs/09_BACKEND_GRAPHQL.md",
+      "name": "09 BACKEND GRAPHQL",
+      "filename": "09_BACKEND_GRAPHQL.md",
+      "title": "Backend Integration: GraphQL"
+    },
+    {
+      "path": "docs/10_PERFORMANCE_OPTIMIZATION.md",
+      "name": "10 PERFORMANCE OPTIMIZATION",
+      "filename": "10_PERFORMANCE_OPTIMIZATION.md",
+      "title": "Performance Optimization & Batch Operations"
+    },
+    {
+      "path": "docs/11_CONFIGURATION.md",
+      "name": "11 CONFIGURATION",
+      "filename": "11_CONFIGURATION.md",
+      "title": "Configuration & Environment Management"
+    },
+    {
+      "path": "docs/12_ERROR_HANDLING.md",
+      "name": "12 ERROR HANDLING",
+      "filename": "12_ERROR_HANDLING.md",
+      "title": "Error Handling & Recovery"
+    },
+    {
+      "path": "docs/13_TESTING.md",
+      "name": "13 TESTING",
+      "filename": "13_TESTING.md",
+      "title": "Testing & Quality Assurance"
+    },
+    {
+      "path": "docs/14_API_REFERENCE.md",
+      "name": "14 API REFERENCE",
+      "filename": "14_API_REFERENCE.md",
+      "title": "API Reference"
+    },
+    {
+      "path": "docs/15_QUICK_REFERENCE.md",
+      "name": "15 QUICK REFERENCE",
+      "filename": "15_QUICK_REFERENCE.md",
+      "title": "Quick Reference"
+    },
+    {
+      "path": "docs/16_V0_5_0_UPGRADE.md",
+      "name": "16 V0 5 0 UPGRADE",
+      "filename": "16_V0_5_0_UPGRADE.md",
+      "title": "v0.5.0 \u2192 v0.5.1 Upgrade Guide"
+    },
+    {
+      "path": "docs/17_TROUBLESHOOTING.md",
+      "name": "17 TROUBLESHOOTING",
+      "filename": "17_TROUBLESHOOTING.md",
+      "title": "Troubleshooting Guide"
+    },
+    {
+      "path": "docs/18_FAQ.md",
+      "name": "18 FAQ",
+      "filename": "18_FAQ.md",
+      "title": "FAQ - Frequently Asked Questions"
+    },
+    {
+      "path": "docs/19_REALTIME_SUBSCRIPTIONS.md",
+      "name": "19 REALTIME SUBSCRIPTIONS",
+      "filename": "19_REALTIME_SUBSCRIPTIONS.md",
+      "title": "Real-Time Subscriptions"
+    },
+    {
+      "path": "docs/20_BACKEND_HIVE.md",
+      "name": "20 BACKEND HIVE",
+      "filename": "20_BACKEND_HIVE.md",
+      "title": "Local Storage: Hive"
+    },
+    {
+      "path": "docs/21_ENTERPRISE_PATTERNS.md",
+      "name": "21 ENTERPRISE PATTERNS",
+      "filename": "21_ENTERPRISE_PATTERNS.md",
+      "title": "Enterprise Patterns & Production Deployment"
+    },
+    {
+      "path": "docs/22_BACKEND_DRIFT.md",
+      "name": "22 BACKEND DRIFT",
+      "filename": "22_BACKEND_DRIFT.md",
+      "title": "Local Storage: Drift"
+    },
+    {
+      "path": "docs/23_BACKEND_ISAR.md",
+      "name": "23 BACKEND ISAR",
+      "filename": "23_BACKEND_ISAR.md",
+      "title": "Local Storage: Isar"
+    },
+    {
+      "path": "docs/24_SYNC_ORCHESTRATION_STRATEGY.md",
+      "name": "24 SYNC ORCHESTRATION STRATEGY",
+      "filename": "24_SYNC_ORCHESTRATION_STRATEGY.md",
+      "title": "Sync Orchestration Strategy - Advanced Control"
+    },
+    {
+      "path": "docs/ENTERPRISE_PATTERNS.md",
+      "name": "ENTERPRISE PATTERNS",
+      "filename": "ENTERPRISE_PATTERNS.md",
+      "title": "Enterprise Patterns"
+    },
+    {
+      "path": "docs/INDEX.md",
+      "name": "INDEX",
+      "filename": "INDEX.md",
+      "title": "Replicore Framework - Enterprise Documentation Index"
+    },
+    {
+      "path": "docs/REALTIME_SUBSCRIPTIONS.md",
+      "name": "REALTIME SUBSCRIPTIONS",
+      "filename": "REALTIME_SUBSCRIPTIONS.md",
+      "title": "Real-Time Subscriptions in Replicore v0.5.0"
+    },
+    {
+      "path": "docs/V0.3_V0.4_RELEASE.md",
+      "name": "V0.3 V0.4 RELEASE",
+      "filename": "V0.3_V0.4_RELEASE.md",
+      "title": "Replicore v0.3.0 & v0.4.0 Release Guide"
+    },
+    {
+      "path": "docs/v0_5_0_ECOSYSTEM_GUIDE.md",
+      "name": "v0 5 0 ECOSYSTEM GUIDE",
+      "filename": "v0_5_0_ECOSYSTEM_GUIDE.md",
+      "title": "Replicore v0.5.0 - Ecosystem Expansion Guide"
+    },
+    {
+      "path": "docs/v0_5_0_INTEGRATION_PATTERNS.md",
+      "name": "v0 5 0 INTEGRATION PATTERNS",
+      "filename": "v0_5_0_INTEGRATION_PATTERNS.md",
+      "title": "v0.5.0 Integration Patterns - Complete Setup Guides"
+    }
+  ],
+  "stats": {
+    "total_documents": 30,
+    "total_pages": 31
+  }
+}

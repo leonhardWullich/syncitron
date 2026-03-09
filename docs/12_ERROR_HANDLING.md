@@ -46,22 +46,21 @@ try {
 }
 ```
 
-### Stream Error Handling
+### Exception Handling in Try-Catch
 
 ```dart
-engine.onSyncError.listen((error) {
-  switch (error.runtimeType) {
-    case NetworkException:
-      // Show retry UI
-      break;
-    case SyncException:
-      // Alert user
-      break;
-    default:
-      // Log unexpectedError
-      break;
-  }
-});
+try {
+  await engine.syncAll();
+} on NetworkException catch (error) {
+  // Show retry UI
+  showNetworkError(error);
+} on SyncException catch (error) {
+  // Alert user
+  showSyncError(error);
+} on ReplicoreException catch (error) {
+  // Handle unexpected errors
+  logger.error('Sync error', error: error);
+}
 ```
 
 ---
@@ -229,94 +228,91 @@ void _setupConnectivityMonitoring() {
 }
 ```
 
-### Partial Success Handling
+### Status Monitoring
 
 ```dart
-engine.onSyncComplete.listen((result) {
-  if (result.recordsPushed < result.totalDirty) {
-    logger.warning(
-      'Partial success: ${result.recordsPushed}/'
-      '${result.totalDirty} pushed',
-    );
-    
-    // Failed records will retry next sync automatically
-    // No action needed
+// Monitor sync status in real-time
+engine.statusStream.listen((status) {
+  print('Sync progress: $status');
+  
+  if (status.contains('Error')) {
+    logger.error('Sync error detected: $status');
   }
 });
+
+// Check detailed metrics after sync
+final metrics = await engine.syncAll();
+
+if (!metrics.overallSuccess) {
+  logger.warning(
+    'Sync completed with errors: '
+    '${metrics.totalRecordsPushed}/${metrics.totalRecordsPulled} processed',
+  );
+  print('Conflicts: ${metrics.conflictsEncountered}');
+  print('Duration: ${metrics.duration}');
+}
 ```
 
-### Dead Letter Queue
+### Advanced Error Tracking
 
 ```dart
-// Track permanently failed records
-final deadLetterQueue = <String>[];
-
-engine.onSyncError.listen((error) {
-  if (error.attemptCount >= 10) {
-    // Move to dead letter after 10 failures
-    deadLetterQueue.addAll(error.failedRecords);
+// For tracking permanently failed records
+class SyncErrorTracker {
+  final deadLetterQueue = <String>[];
+  final Map<String, int> retryAttempts = {};
+  
+  void trackRetryAttempt(String recordId) {
+    retryAttempts[recordId] = (retryAttempts[recordId] ?? 0) + 1;
     
-    logger.error(
-      'Moving ${error.failedRecords.length} to DLQ',
-      context: {
-        'table': error.table,
-        'reason': error.message,
-      },
-    );
+    if (retryAttempts[recordId]! >= 10) {
+      // Move to dead letter after 10 failures
+      deadLetterQueue.add(recordId);
+      logger.error('Record moved to DLQ', context: {'id': recordId});
+    }
   }
-});
+}
 ```
 
 ---
 
 ## 📊 Error Monitoring
 
-### Track Error Rates
+### Track Sync Metrics Over Time
 
 ```dart
-class ErrorMonitor {
-  int totalSyncs = 0;
-  int failedSyncs = 0;
-  final errors = <String, int>{};
+class SyncMetricsTracker {
+  final List<SyncSessionMetrics> history = [];
   
-  void trackError(Exception e) {
-    final type = e.runtimeType.toString();
-    errors[type] = (errors[type] ?? 0) + 1;
+  void trackSync(SyncSessionMetrics metrics) {
+    history.add(metrics);
   }
   
-  double getErrorRate() {
-    return failedSyncs / totalSyncs;
+  double getSuccessRate() {
+    if (history.isEmpty) return 0;
+    final successful = history.where((m) => m.overallSuccess).length;
+    return successful / history.length;
   }
   
   void printStats() {
-    print('Error rate: ${getErrorRate() * 100}%');
-    errors.forEach((type, count) {
-      print('  $type: $count');
-    });
+    print('Success rate: ${getSuccessRate() * 100}%');
+    print('Total syncs: ${history.length}');
+    
+    final avgPulled = history.isEmpty ? 0 : 
+      history.fold<int>(0, (sum, m) => sum + m.totalRecordsPulled) / history.length;
+    print('Avg records pulled: ${avgPulled.toStringAsFixed(2)}');
   }
 }
 
-final monitor = ErrorMonitor();
+final tracker = SyncMetricsTracker();
 
-engine.onSyncStart.listen((_) {
-  monitor.totalSyncs++;
-});
+// After each sync
+final metrics = await engine.syncAll();
+tracker.trackSync(metrics);
 
-engine.onSyncError.listen((error) {
-  monitor.failedSyncs++;
-  monitor.trackError(error);
-});
-```
-
-### Alert on Thresholds
-
-```dart
-engine.onSyncError.listen((error) {
-  if (monitor.getErrorRate() > 0.1) {
-    // >10% error rate
-    sendAlert('High sync error rate detected');
-  }
-});
+if (tracker.getSuccessRate() < 0.9) {
+  // <90% success rate
+  sendAlert('Sync reliability below threshold');
+}
 ```
 
 ---

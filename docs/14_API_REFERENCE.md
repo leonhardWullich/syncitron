@@ -207,73 +207,89 @@ await engine.bulkDelete('todos', ids);
 
 ---
 
-### Events & Streams
+### Status Monitoring & Streams
 
-#### `onSyncStart`
+#### `statusStream`
 
-Emitted when sync begins.
+Emitted for all sync status updates.
 
 ```dart
-engine.onSyncStart.listen((_) {
-  print('Sync started...');
-  showProgressIndicator();
+engine.statusStream.listen((status) {
+  print('Status: $status');
+  
+  if (status == 'Starting Full Sync...') {
+    showProgressIndicator();
+  } else if (status.contains('complete') || status.contains('Error')) {
+    hideProgressIndicator();
+  }
 });
+```
+
+**Examples**:
+```
+'Starting Full Sync...'
+'Syncing users...'
+'Syncing todos...'
+'Error syncing todos.'
+'Sync complete'
 ```
 
 ---
 
-#### `onSyncComplete`
+#### Sync Metrics (Returned from syncAll)
 
-Emitted after successful sync.
+After sync completes, get detailed metrics:
 
 ```dart
-engine.onSyncComplete.listen((result) {
-  print('Pulled: ${result.recordsPulled}');
-  print('Pushed: ${result.recordsPushed}');
-  hideProgressIndicator();
-});
+final metrics = await engine.syncAll();
+
+print('Overall success: ${metrics.overallSuccess}');
+print('Records pulled: ${metrics.totalRecordsPulled}');
+print('Records pushed: ${metrics.totalRecordsPushed}');
+print('Conflicts: ${metrics.conflictsEncountered}');
+print('Duration: ${metrics.duration}');
+
+// Per-table metrics
+for (final table in metrics.metrics) {
+  print('${table.tableName}:');
+  print('  Pulled: ${table.recordsPulled}');
+  print('  Pushed: ${table.recordsPushed}');
+  print('  Duration: ${table.duration}');
+}
 ```
 
-**Result**:
+**SyncSessionMetrics**:
 ```dart
-class SyncResult {
-  final int recordsPulled;
-  final int recordsPushed;
-  final int conflictsResolved;
-  final Duration duration;
+class SyncSessionMetrics {
+  final List<SyncMetrics> metrics;
+  final DateTime startTime;
+  
+  bool get overallSuccess;
+  int get totalRecordsPulled;
+  int get totalRecordsPushed;
+  int get conflictsEncountered;
+  Duration get duration;
 }
 ```
 
 ---
 
-#### `onSyncError`
+#### Error Handling via Try-Catch
 
-Emitted if sync fails.
-
-```dart
-engine.onSyncError.listen((error) {
-  print('Sync error: ${error.message}');
-  
-  if (error is NetworkException) {
-    showRetryButton();
-  }
-});
-```
-
----
-
-#### `onDataChanged`
-
-Emitted when local data changes.
+For detailed error handling, catch exceptions:
 
 ```dart
-engine.onDataChanged.listen((change) {
-  print('Table: ${change.table}');
-  print('Operation: ${change.operation}');  // insert/update/delete
-  
-  // Rebuild UI
-  setState(() {});
-});
+try {
+  final metrics = await engine.syncAll();
+  print('Sync successful: ${metrics.overallSuccess}');
+} on NetworkException catch (e) {
+  print('Network error: ${e.message}');
+  showRetryButton();
+} on ConflictException catch (e) {
+  print('Conflict on ${e.table}: ${e.message}');
+} on ReplicoreException catch (e) {
+  print('Sync error: ${e.message}');
+}
 ```
 
 ---
@@ -580,26 +596,37 @@ await engine.writeLocal('todos', {
 });
 
 // Sync
-await engine.sync();
+await engine.syncAll();
 
 // Delete
 await engine.deleteLocal('todos', '1');
 
 // Sync again
-await engine.sync();
+final metrics = await engine.syncAll();
+print('Synced ${metrics.totalRecordsPushed} records');
 ```
 
-### Real-time Sync
+### Monitoring Sync Progress
 
 ```dart
-engine.onDataChanged.listen((change) {
-  print('${change.table}: ${change.operation}');
-  setState(() {});  // Rebuild UI
+// Listen to real-time status updates
+engine.statusStream.listen((status) {
+  print('Sync status: $status');
+  
+  if (status == 'Starting Full Sync...') {
+    setState(() { isSyncing = true; });
+  } else if (status.contains('complete') || status.contains('Error')) {
+    setState(() { isSyncing = false; });
+  }
 });
 
-engine.onSyncComplete.listen((result) {
-  print('Synced ${result.recordsPushed} records');
-});
+// After sync, check metrics
+try {
+  final metrics = await engine.syncAll();
+  print('Successfully synced ${metrics.totalRecordsPushed} records');
+} catch (e) {
+  print('Sync error: $e');
+}
 ```
 
 ### Error Handling
