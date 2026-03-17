@@ -27,12 +27,13 @@ Create a collection named `todos` in your database with these attributes:
 |-------------|-----------|----------|---------|
 | `user_id`   | String    | Yes      | —       |
 | `title`     | String    | Yes      | —       |
-| `is_done`   | Boolean   | Yes      | `false` |
+| `is_done`   | Integer   | Yes      | `0`     |
 | `updated_at`| String    | Yes      | —       |
 | `deleted_at`| String    | No       | `null`  |
 
-> **Note:** The document `$id` serves as the primary key. Appwrite manages
-> it automatically.
+> **Note:** Use **Integer** (not Boolean) for `is_done` — SQLite stores
+> booleans as 0/1 and syncitron pushes the raw values. The document `$id`
+> serves as the primary key; do **not** add an `id` attribute.
 
 ### 3. Create Indexes
 
@@ -123,3 +124,11 @@ lib/
 3. **Real-time** — Open on two devices, changes appear instantly
 4. **Pull-to-refresh** — Swipe down to manually trigger sync
 5. **Session expiry** — Let token expire, observe auth error banner
+
+## License
+
+This example is part of syncitron and is currently available free of charge
+under the MIT License. See [../LICENSE](../LICENSE).
+
+Roadmap note: as syncitron grows, future releases may also be offered under a
+dual-license model.

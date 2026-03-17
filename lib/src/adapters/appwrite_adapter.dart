@@ -141,24 +141,36 @@ class AppwriteAdapter implements RemoteAdapter {
     try {
       final id = data['id'] ?? data.keys.first;
 
-      // Check if document exists
-      final doc = await database
-          .getDocument(
-            databaseId: databaseId,
-            collectionId: table,
-            documentId: id.toString(),
-          )
-          .timeout(timeout)
-          .catchError((_) => null); // Return null if not found
+      // Strip document ID and null values from the payload —
+      // Appwrite manages $id via the documentId parameter, and
+      // may reject unknown attributes or explicit nulls.
+      final payload = Map<String, dynamic>.from(data)
+        ..remove('id')
+        ..removeWhere((_, v) => v == null);
 
-      if (doc != null) {
+      // Check if document exists
+      bool exists = false;
+      try {
+        await database
+            .getDocument(
+              databaseId: databaseId,
+              collectionId: table,
+              documentId: id.toString(),
+            )
+            .timeout(timeout);
+        exists = true;
+      } catch (_) {
+        // Document not found — will create below
+      }
+
+      if (exists) {
         // Update existing document
         await database
             .updateDocument(
               databaseId: databaseId,
               collectionId: table,
               documentId: id.toString(),
-              data: data,
+              data: payload,
             )
             .timeout(timeout);
       } else {
@@ -168,7 +180,7 @@ class AppwriteAdapter implements RemoteAdapter {
               databaseId: databaseId,
               collectionId: table,
               documentId: id.toString(),
-              data: data,
+              data: payload,
             )
             .timeout(timeout);
       }
@@ -181,7 +193,7 @@ class AppwriteAdapter implements RemoteAdapter {
     } catch (e) {
       throw SyncNetworkException(
         table: table,
-        message: 'Failed to upsert into Appwrite table "$table".',
+        message: 'Failed to upsert into Appwrite table "$table": $e',
         cause: e,
       );
     }
@@ -236,25 +248,24 @@ class AppwriteAdapter implements RemoteAdapter {
     if (records.isEmpty) return [];
 
     // Appwrite doesn't have native batch operations,
-    // but we can process records in parallel for better performance
-    final results = await Future.wait(
-      records.map((record) async {
-        try {
-          final pkValue = record[primaryKeyColumn];
-          await upsert(
-            table: table,
-            data: record,
-            idempotencyKey: idempotencyKeys?[pkValue?.toString()],
-          );
-          return pkValue;
-        } catch (e) {
-          return null; // Failed records return null
-        }
-      }),
-    );
-
-    // Return only successful IDs
-    return results.where((id) => id != null).toList();
+    // so we process records sequentially to avoid rate limiting.
+    final successfulIds = <dynamic>[];
+    for (final record in records) {
+      final pkValue = record[primaryKeyColumn];
+      try {
+        await upsert(
+          table: table,
+          data: record,
+          idempotencyKey: idempotencyKeys?[pkValue?.toString()],
+        );
+        successfulIds.add(pkValue);
+      } catch (e) {
+        // Log but continue with remaining records
+        // ignore: avoid_print
+        print('[AppwriteAdapter] batchUpsert failed for $pkValue: $e');
+      }
+    }
+    return successfulIds;
   }
 
   @override

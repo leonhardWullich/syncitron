@@ -269,7 +269,11 @@ print('Duration: ${sessionMetrics.totalDuration}');
 
 ## 📝 License
 
-This example is part of syncitron. See [../LICENSE](../LICENSE).
+This example is part of syncitron and is currently available free of charge
+under the MIT License. See [../LICENSE](../LICENSE).
+
+Roadmap note: as syncitron grows, future releases may also be offered under a
+dual-license model.
 
 Replace the two placeholders in `lib/main.dart`:
 ```dart

@@ -12,3 +12,5 @@ example/.flutter-plugins-dependencies
 example/.DS_Store
 example/build 2/
 example/build.nosync/
+
+example_appwrite/

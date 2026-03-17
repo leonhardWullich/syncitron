@@ -170,6 +170,10 @@ class SyncService {
     } on syncitronException catch (e) {
       syncError.value = e;
       debugPrint('[SyncService] Sync error: $e');
+    } catch (e, st) {
+      // Catch non-syncitron exceptions (e.g. AppwriteException) so they
+      // don't become invisible unhandled-future errors.
+      debugPrint('[SyncService] Unexpected error: $e\n$st');
     } finally {
       _syncInProgress = false;
     }

@@ -963,7 +963,13 @@ We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ## 📄 License
 
-MIT - See [LICENSE](LICENSE) for details.
+syncitron is currently available free of charge under the MIT License.
+
+See [LICENSE](LICENSE) for full terms.
+
+Planned licensing roadmap: as the plugin grows, future releases may also be
+offered under a dual-license model (for example MIT + commercial license).
+All rights granted under MIT for already published versions remain valid.
 
 ---
 

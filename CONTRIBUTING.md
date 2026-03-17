@@ -312,7 +312,12 @@ Only maintainers can create releases. The process is:
 
 ## Legal
 
-By contributing to syncitron, you agree that your contributions will be licensed under its MIT License.
+By contributing to syncitron, you agree that your contributions are licensed
+under the MIT License for the current open-source distribution.
+
+Roadmap note: maintainers may offer future releases under a dual-license
+model as the project grows. Permissions already granted under MIT for
+published versions remain valid.
 
 ---
 
