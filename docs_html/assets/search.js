@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════
-   Replicore Docs — Full-Text Fuzzy Search
+   syncitron Docs — Full-Text Fuzzy Search
    Loads search-index.json, indexes content with bigrams for
    similarity matching, and provides instant search results.
    ═══════════════════════════════════════════════════════════════════ */

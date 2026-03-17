@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Replicore Documentation HTML Generator
+syncitron Documentation HTML Generator
 
 Converts all markdown documentation files to a professional website
 with navigation, search, and responsive design.
@@ -181,7 +181,7 @@ def generate_css():
     """Generate the main CSS stylesheet"""
     return """
 /* ============================================
-   Replicore Documentation - Main Stylesheet
+   syncitron Documentation - Main Stylesheet
    ============================================ */
 
 * {
@@ -776,7 +776,7 @@ def generate_html_page(title, content, docs, current_doc=None):
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>""" + html_escape(title) + """ - Replicore Documentation</title>
+    <title>""" + html_escape(title) + """ - syncitron Documentation</title>
     <style>
 """ + css + """
     </style>
@@ -785,7 +785,7 @@ def generate_html_page(title, content, docs, current_doc=None):
     <header>
         <div class="navbar">
             <div>
-                <h1>📚 Replicore Documentation</h1>
+                <h1>📚 syncitron Documentation</h1>
                 <p>Enterprise Local-First Sync for Flutter</p>
             </div>
             <button class="theme-toggle" id="themeToggle">🌙 Dark Mode</button>
@@ -803,8 +803,8 @@ def generate_html_page(title, content, docs, current_doc=None):
     </div>
     
     <footer>
-        <p>&copy; 2026 Replicore Framework. All rights reserved.</p>
-        <p><a href="https://github.com">GitHub Repository</a> | <a href="https://pub.dev/packages/replicore">Pub.dev</a></p>
+        <p>&copy; 2026 syncitron Framework. All rights reserved.</p>
+        <p><a href="https://github.com">GitHub Repository</a> | <a href="https://pub.dev/packages/syncitron">Pub.dev</a></p>
     </footer>
     
     <script>
@@ -912,9 +912,9 @@ def main():
         else:
             index_html_content = simple_markdown_to_html(readme_content)
     except:
-        index_html_content = "<h1>Replicore Documentation</h1><p>Welcome to the Replicore documentation website.</p>"
+        index_html_content = "<h1>syncitron Documentation</h1><p>Welcome to the syncitron documentation website.</p>"
     
-    index_html = generate_html_page('Home - Replicore Documentation', index_html_content, docs)
+    index_html = generate_html_page('Home - syncitron Documentation', index_html_content, docs)
     
     with open(output_dir / 'index.html', 'w', encoding='utf-8') as f:
         f.write(index_html)
@@ -925,7 +925,7 @@ def main():
     print("  ✓ Creating docs-manifest.json...", end='', flush=True)
     
     manifest = {
-        'title': 'Replicore Documentation',
+        'title': 'syncitron Documentation',
         'version': '0.5.1',
         'generated': datetime.now().isoformat(),
         'documents': docs,

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Real-Time Sync — Replicore Docs</title>
+<title>Real-Time Sync — syncitron Docs</title>
 <link rel="stylesheet" href="assets/style.css">
 <script src="assets/app.js"></script>
 <script src="assets/search.js"></script>
@@ -10,7 +10,7 @@
 <body>
 <div class="topbar">
   <button class="hamburger" onclick="toggleSidebar()">☰</button>
-  <div class="logo">Replicore <span>v0.5.1 Docs</span></div>
+  <div class="logo">syncitron <span>v0.5.1 Docs</span></div>
   <div class="spacer"></div>
   <button class="search-trigger" onclick="openSearch()">🔍 Search <kbd>⌘K</kbd></button>
   <button id="theme-btn" onclick="toggleDark()">🌙 Dark</button>
@@ -58,7 +58,7 @@
 </nav>
 <main class="content">
 <h1>Real-Time Sync</h1>
-<p style="opacity:.75;font-size:.9rem;margin-top:-.5rem">Event-driven sync with auto-reconnect</p><p>Replicore supports event-driven real-time synchronization for all four backends. When data changes on the server, the client syncs automatically — no polling needed.</p><h2>Architecture</h2><pre><code>Remote Backend  ──▶  RealtimeSubscriptionProvider  ──▶  RealtimeSubscriptionManager
+<p style="opacity:.75;font-size:.9rem;margin-top:-.5rem">Event-driven sync with auto-reconnect</p><p>syncitron supports event-driven real-time synchronization for all four backends. When data changes on the server, the client syncs automatically — no polling needed.</p><h2>Architecture</h2><pre><code>Remote Backend  ──▶  RealtimeSubscriptionProvider  ──▶  RealtimeSubscriptionManager
                          (per backend)                     (debounce → engine.syncTableByName())</code></pre><h2>Setup</h2><pre><code class="language-dart">final manager = RealtimeSubscriptionManager(
   config: RealtimeSubscriptionConfig.production(),
   provider: SupabaseRealtimeProvider(
@@ -72,7 +72,7 @@
 await manager.initialize([&#x27;todos&#x27;, &#x27;projects&#x27;]);</code></pre><h2>RealtimeSubscriptionConfig</h2><table><thead><tr><th>Parameter</th><th>Type</th><th>Default</th><th>Description</th></tr></thead><tbody><tr><td><code>enabled</code></td><td><code>bool</code></td><td>true</td><td>Master switch</td></tr><tr><td><code>autoSync</code></td><td><code>bool</code></td><td>true</td><td>Auto-sync when changes detected</td></tr><tr><td><code>debounce</code></td><td><code>Duration</code></td><td>2 s</td><td>Debounce window to coalesce rapid changes</td></tr><tr><td><code>connectionTimeout</code></td><td><code>Duration</code></td><td>30 s</td><td>Connection timeout</td></tr><tr><td><code>autoReconnect</code></td><td><code>bool</code></td><td>true</td><td>Auto-reconnect on disconnect</td></tr><tr><td><code>maxReconnectAttempts</code></td><td><code>int</code></td><td>5</td><td>Max reconnect tries</td></tr><tr><td><code>backoffMultiplier</code></td><td><code>double</code></td><td>2.0</td><td>Exponential backoff factor</td></tr></tbody></table><h3>Presets</h3><pre><code class="language-dart">RealtimeSubscriptionConfig.production()    // 2s debounce, 5 retries, 2× backoff
 RealtimeSubscriptionConfig.development()   // 1s debounce, 10 retries, 1.5× backoff
 RealtimeSubscriptionConfig.disabled()      // everything off</code></pre><h2>RealtimeSubscriptionManager API</h2><table><thead><tr><th>Method</th><th>Description</th></tr></thead><tbody><tr><td><code>initialize(tables)</code></td><td>Subscribe to listed tables, start listening</td></tr><tr><td><code>syncTable(table)</code></td><td>Manually queue a table for debounced sync</td></tr><tr><td><code>syncPendingTables()</code></td><td>Immediately sync all pending tables</td></tr><tr><td><code>isConnected</code></td><td>Getter — current connection status</td></tr><tr><td><code>activeSubscriptionCount</code></td><td>Number of active subscriptions</td></tr><tr><td><code>subscribedTables</code></td><td>List of subscribed table names</td></tr><tr><td><code>close()</code></td><td>Cancel all subscriptions and close connection</td></tr></tbody></table><h2>Backend Support Matrix</h2><table><thead><tr><th>Backend</th><th>Provider Class</th><th>Protocol</th></tr></thead><tbody><tr><td>Supabase</td><td><code>SupabaseRealtimeProvider</code></td><td>PostgreSQL LISTEN/NOTIFY via WebSocket</td></tr><tr><td>Firebase</td><td><code>FirebaseFirestoreRealtimeProvider</code></td><td>Firestore snapshot listeners</td></tr><tr><td>Appwrite</td><td><code>AppwriteRealtimeProvider</code></td><td>WebSocket real-time service</td></tr><tr><td>GraphQL</td><td><code>GraphQLRealtimeProvider</code></td><td>GraphQL subscriptions over WebSocket</td></tr></tbody></table><h2>How It Works</h2><ol><li>The provider subscribes to the backend's real-time channel for each table.</li><li>When a <code>RealtimeChangeEvent</code> arrives (insert/update/delete), the table is added to the pending set.</li><li>A debounce timer coalesces rapid changes (default 2 seconds).</li><li>After the debounce window, <code>engine.syncTableByName(table)</code> is called for each pending table.</li><li>On disconnect, auto-reconnect kicks in with exponential backoff.</li></ol><div class="page-nav"><a href="orchestration.html"><div class="label">← Previous</div><div class="title">Sync Orchestration</div></a><a href="widgets.html" class="next"><div class="label">Next →</div><div class="title">UI Widgets</div></a></div>
-<div class="footer">Replicore v0.5.1 — Enterprise Local-First Sync for Flutter &middot; MIT License</div>
+<div class="footer">syncitron v0.5.1 — Enterprise Local-First Sync for Flutter &middot; MIT License</div>
 </main>
 </div>
 </body></html>

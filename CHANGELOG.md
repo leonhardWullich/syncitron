@@ -5,13 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.1]
+
+### Changed
+
+- Renamed package from `replicore` to `syncitron` across public API, docs, tests, and example app.
+- Renamed primary library entrypoint to `lib/syncitron.dart` and aligned package imports.
+- Updated docs, repository links, and branding assets to `syncitron`.
+
 ## [0.5.0]
 
 ### Added
 
 #### New LocalStore Implementations
 
-Replicore now supports multiple persistence layers with specialized implementations:
+syncitron now supports multiple persistence layers with specialized implementations:
 
 - **DriftStore** - Drift (typed SQLite) integration
   - Compile-time type safety via Drift code generation
@@ -61,7 +69,7 @@ Expand your sync capabilities with built-in adapters for popular backends:
 
 #### Real-Time Subscriptions (NEW!)
 
-Replicore now supports **real-time event-driven syncing** without polling:
+syncitron now supports **real-time event-driven syncing** without polling:
 
 - **RealtimeSubscriptionManager** - Centralized real-time subscription handling
   - Automatic real-time change detection from backend
@@ -85,7 +93,7 @@ Replicore now supports **real-time event-driven syncing** without polling:
 
 **Usage Example:**
 ```dart
-import 'package:replicore/replicore.dart';
+import 'package:syncitron/syncitron.dart';
 
 // Create engine (same as before)
 final engine = SyncEngine(...);
@@ -106,7 +114,7 @@ if (realtimeProvider != null) {
 
   // Now, when remote data changes:
   // 1. Real-time event arrives
-  // 2. Replicore detects the change
+  // 2. syncitron detects the change
   // 3. Only the affected table syncs (not all tables)
   // 4. UI updates automatically
 
@@ -176,7 +184,7 @@ final store = DriftStore(
 );
 
 // Or use Hive for lightweight scenarios
-final hiveBox = await Hive.openBox('replicore_sync');
+final hiveBox = await Hive.openBox('syncitron_sync');
 final store = HiveStore(
   metadataBox: hiveBox,
   dataBoxFactory: (table) => Hive.openBox(table),
@@ -363,7 +371,7 @@ SyncEngine(..., logger: ConsoleLogger())
   - InMemory and NoOp metric collectors
   - JSON export for external analytics systems
 
-- **Configuration Management** (`ReplicoreConfig`)
+- **Configuration Management** (`syncitronConfig`)
   - Factory methods for Production, Development, and Testing configs
   - Validation on creation with detailed error messages
   - Configurable retry strategies with exponential backoff
@@ -397,9 +405,9 @@ SyncEngine(..., logger: ConsoleLogger())
 
 - **SyncEngine Constructor Changes**
   - Removed individual parameters: `batchSize`, `isSyncedColumn`, `operationIdColumn`
-  - Now accepts `ReplicoreConfig` object for all configuration
+  - Now accepts `syncitronConfig` object for all configuration
   - Added `logger` and `metricsCollector` parameters
-  - Migration: Use `ReplicoreConfig` and pass to `config` parameter
+  - Migration: Use `syncitronConfig` and pass to `config` parameter
 
 - **Method Return Types**
   - `syncAll()` now returns `SyncSessionMetrics` instead of `void`
@@ -428,7 +436,7 @@ SyncEngine(..., logger: ConsoleLogger())
 
 ### Added
 
-- Initial Replicore package release
+- Initial syncitron package release
 - SyncEngine for bidirectional synchronization
 - Multiple conflict resolution strategies
 - SQLite/sqflite storage implementation
@@ -473,7 +481,7 @@ New UI widgets available; no breaking changes.
   - InMemory and NoOp metric collectors
   - JSON export for external analytics systems
 
-- **Configuration Management** (`ReplicoreConfig`)
+- **Configuration Management** (`syncitronConfig`)
   - Factory methods for Production, Development, and Testing configs
   - Validation on creation with detailed error messages
   - Configurable retry strategies with exponential backoff
@@ -507,9 +515,9 @@ New UI widgets available; no breaking changes.
 
 - **SyncEngine Constructor Changes**
   - Removed individual parameters: `batchSize`, `isSyncedColumn`, `operationIdColumn`
-  - Now accepts `ReplicoreConfig` object for all configuration
+  - Now accepts `syncitronConfig` object for all configuration
   - Added `logger` and `metricsCollector` parameters
-  - Migration: Use `ReplicoreConfig` and pass to `config` parameter
+  - Migration: Use `syncitronConfig` and pass to `config` parameter
 
 - **Method Return Types**
   - `syncAll()` now returns `SyncSessionMetrics` instead of `void`
@@ -538,7 +546,7 @@ New UI widgets available; no breaking changes.
 
 ### Added
 
-- Initial Replicore package release
+- Initial syncitron package release
 - SyncEngine for bidirectional synchronization
 - Multiple conflict resolution strategies
 - SQLite/sqflite storage implementation
@@ -557,8 +565,8 @@ New UI widgets available; no breaking changes.
 
 ```dart
 // No breaking imports, but new modules available:
-import 'package:replicore/replicore.dart';
-// Now includes: Logger, ReplicoreConfig, SyncMetrics, etc.
+import 'package:syncitron/syncitron.dart';
+// Now includes: Logger, syncitronConfig, SyncMetrics, etc.
 ```
 
 ### 2. Update SyncEngine Initialization
@@ -577,7 +585,7 @@ final engine = SyncEngine(
 final engine = SyncEngine(
   localStore: store,
   remoteAdapter: adapter,
-  config: ReplicoreConfig.production(),
+  config: syncitronConfig.production(),
   logger: ConsoleLogger(),
 );
 ```

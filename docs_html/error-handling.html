@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Error Handling — Replicore Docs</title>
+<title>Error Handling — syncitron Docs</title>
 <link rel="stylesheet" href="assets/style.css">
 <script src="assets/app.js"></script>
 <script src="assets/search.js"></script>
@@ -10,7 +10,7 @@
 <body>
 <div class="topbar">
   <button class="hamburger" onclick="toggleSidebar()">☰</button>
-  <div class="logo">Replicore <span>v0.5.1 Docs</span></div>
+  <div class="logo">syncitron <span>v0.5.1 Docs</span></div>
   <div class="spacer"></div>
   <button class="search-trigger" onclick="openSearch()">🔍 Search <kbd>⌘K</kbd></button>
   <button id="theme-btn" onclick="toggleDark()">🌙 Dark</button>
@@ -58,7 +58,7 @@
 </nav>
 <main class="content">
 <h1>Error Handling</h1>
-<p style="opacity:.75;font-size:.9rem;margin-top:-.5rem">Sealed exception hierarchy</p><p>Replicore uses a <strong>sealed exception hierarchy</strong> rooted at <code>ReplicoreException</code>. You can pattern-match on specific types for granular error handling.</p><h2>Exception Hierarchy</h2><pre><code>ReplicoreException  (sealed)
+<p style="opacity:.75;font-size:.9rem;margin-top:-.5rem">Sealed exception hierarchy</p><p>syncitron uses a <strong>sealed exception hierarchy</strong> rooted at <code>syncitronException</code>. You can pattern-match on specific types for granular error handling.</p><h2>Exception Hierarchy</h2><pre><code>syncitronException  (sealed)
   ├── SyncNetworkException       — network / timeout / server error
   ├── SyncAuthException          — 401/403, session expired
   ├── ConflictResolutionException — custom resolver threw
@@ -78,11 +78,11 @@
   reportFatalError(e);
 } on LocalStoreException catch (e) {
   showError(&#x27;Database error: ${e.message}&#x27;);
-} on ReplicoreException catch (e) {
-  // catch-all for any Replicore error
+} on syncitronException catch (e) {
+  // catch-all for any syncitron error
   showError(&#x27;Sync error: ${e.message}&#x27;);
 }</code></pre><h2>Exception Details</h2><h3>SyncNetworkException</h3><table><thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>table</code></td><td><code>String</code></td><td>The table being synced</td></tr><tr><td><code>statusCode</code></td><td><code>int?</code></td><td>HTTP status code, <code>null</code> if offline</td></tr><tr><td><code>isOffline</code></td><td><code>bool</code></td><td>Getter — <code>true</code> when statusCode is null</td></tr><tr><td><code>cause</code></td><td><code>Object?</code></td><td>Original underlying exception</td></tr></tbody></table><h3>SyncAuthException</h3><table><thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>table</code></td><td><code>String</code></td><td>The table being synced</td></tr><tr><td><code>message</code></td><td><code>String</code></td><td>Default: 'Unauthorized. Session may have expired.'</td></tr></tbody></table><h3>ConflictResolutionException</h3><table><thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>table</code></td><td><code>String</code></td><td>Table where conflict occurred</td></tr><tr><td><code>primaryKey</code></td><td><code>dynamic</code></td><td>Primary key of the conflicting record</td></tr><tr><td><code>cause</code></td><td><code>Object?</code></td><td>The error thrown by the custom resolver</td></tr></tbody></table><h3>SchemaMigrationException</h3><table><thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>table</code></td><td><code>String</code></td><td>Table being migrated</td></tr><tr><td><code>column</code></td><td><code>String</code></td><td>Column that failed to add</td></tr></tbody></table><h3>LocalStoreException</h3><table><thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead><tbody><tr><td><code>table</code></td><td><code>String</code></td><td>Table with the local DB error</td></tr><tr><td><code>message</code></td><td><code>String</code></td><td>Error description</td></tr></tbody></table><h3>UnregisteredTableException</h3><p>Thrown when you attempt to sync a table that hasn't been registered via <code>registerTable()</code>.</p><h3>EngineConfigurationException</h3><p>Thrown at setup time, e.g. using <code>SyncStrategy.custom</code> without a <code>customResolver</code>, or invalid config values.</p><div class="callout callout-info"><span class="icon">ℹ️</span><div>All exceptions include a <code>cause</code> field for chaining the original underlying error.</div></div><div class="page-nav"><a href="configuration.html"><div class="label">← Previous</div><div class="title">Configuration</div></a><a href="metrics-logging.html" class="next"><div class="label">Next →</div><div class="title">Metrics & Logging</div></a></div>
-<div class="footer">Replicore v0.5.1 — Enterprise Local-First Sync for Flutter &middot; MIT License</div>
+<div class="footer">syncitron v0.5.1 — Enterprise Local-First Sync for Flutter &middot; MIT License</div>
 </main>
 </div>
 </body></html>

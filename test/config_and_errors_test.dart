@@ -1,11 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:replicore/replicore.dart';
+import 'package:syncitron/syncitron.dart';
 import 'test_utils.dart';
 
 void main() {
-  group('ReplicoreConfig', () {
+  group('syncitronConfig', () {
     test('should create config with default values', () {
-      final config = ReplicoreConfig.production();
+      final config = syncitronConfig.production();
 
       expect(config.batchSize, greaterThan(0));
       expect(config.maxRetries, greaterThan(0));
@@ -13,7 +13,7 @@ void main() {
     });
 
     test('should create development config', () {
-      final config = ReplicoreConfig.development();
+      final config = syncitronConfig.development();
 
       expect(config.batchSize, greaterThan(0));
       expect(config.maxRetries, greaterThan(0));
@@ -21,13 +21,13 @@ void main() {
 
     test('should support various valid configurations', () {
       final configs = [
-        ReplicoreConfig(
+        syncitronConfig(
           batchSize: 100,
           maxRetries: 3,
           initialRetryDelay: Duration(milliseconds: 100),
           maxRetryDelay: Duration(seconds: 60),
         ),
-        ReplicoreConfig(
+        syncitronConfig(
           batchSize: 1000,
           maxRetries: 5,
           initialRetryDelay: Duration(seconds: 1),
@@ -253,7 +253,7 @@ void main() {
 
   group('Retry Logic', () {
     test('should calculate exponential backoff', () {
-      final config = ReplicoreConfig(
+      final config = syncitronConfig(
         batchSize: 100,
         maxRetries: 3,
         initialRetryDelay: Duration(milliseconds: 100),
@@ -272,7 +272,7 @@ void main() {
     });
 
     test('should respect max retry delay', () {
-      final config = ReplicoreConfig(
+      final config = syncitronConfig(
         batchSize: 100,
         maxRetries: 10,
         initialRetryDelay: Duration(milliseconds: 100),

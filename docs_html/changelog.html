@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Changelog — Replicore Docs</title>
+<title>Changelog — syncitron Docs</title>
 <link rel="stylesheet" href="assets/style.css">
 <script src="assets/app.js"></script>
 <script src="assets/search.js"></script>
@@ -10,7 +10,7 @@
 <body>
 <div class="topbar">
   <button class="hamburger" onclick="toggleSidebar()">☰</button>
-  <div class="logo">Replicore <span>v0.5.1 Docs</span></div>
+  <div class="logo">syncitron <span>v0.5.1 Docs</span></div>
   <div class="spacer"></div>
   <button class="search-trigger" onclick="openSearch()">🔍 Search <kbd>⌘K</kbd></button>
   <button id="theme-btn" onclick="toggleDark()">🌙 Dark</button>
@@ -58,8 +58,8 @@
 </nav>
 <main class="content">
 <h1>Changelog</h1>
-<p style="opacity:.75;font-size:.9rem;margin-top:-.5rem">Version history</p><h2>v0.5.1</h2><ul><li>Added <code>syncTableByName(String)</code> to SyncEngine for convenience</li><li>Removed duplicate <code>HealthCheckResult</code>/<code>HealthStatus</code> from sync_manager.dart</li><li>Exported <code>sync_manager.dart</code> in barrel file</li><li>Replaced custom <code>pow()</code> with <code>dart:math</code> in realtime_subscription.dart</li><li>Fixed <code>RealtimeSubscriptionManager</code> to use <code>syncTableByName</code></li><li>Fixed <code>InMemoryMetricsCollector.recordTableMetrics()</code> double-counting bug</li><li>Fixed <code>SyncManager.syncEngine()</code> using wrong exception type</li><li>Removed unused <code>clock.dart</code></li><li>Fixed README widget API examples to match actual constructors</li></ul><h2>v0.5.0</h2><ul><li><strong>Batch Operations</strong> — 50-100× faster syncs via <code>batchUpsert</code>/<code>batchSoftDelete</code></li><li><strong>Sync Orchestration Strategies</strong> — 5 built-in strategies (Standard, OfflineFirst, StrictManual, Priority, Composite)</li><li><strong>Sealed Exception Hierarchy</strong> — <code>ReplicoreException</code> root with 7 specific subtypes</li><li><strong>Real-Time Subscriptions</strong> — All 4 backends (Supabase, Firebase, Appwrite, GraphQL)</li><li><strong>Multiple Storage Backends</strong> — SqfliteStore, DriftStore, HiveStore, IsarStore</li><li><strong>Multiple Remote Adapters</strong> — Supabase, Firebase Firestore, Appwrite, GraphQL</li><li><strong>SyncManager</strong> — Multi-engine coordination</li><li><strong>Diagnostics</strong> — HealthCheckResult, SystemHealth, DiagnosticsProviders</li><li><strong>UI Widgets</strong> — 6 ready-made Flutter widgets</li><li><strong>Metrics &amp; Logging</strong> — SyncMetrics, SyncSessionMetrics, structured LogEntry</li></ul><h2>v0.4.0</h2><ul><li>Supabase adapter with cursor-based pagination</li><li>Conflict resolution strategies (ServerWins, LocalWins, LastWriteWins, Custom)</li><li>Configurable retry with exponential backoff</li><li>SqfliteStore with sync column auto-migration</li></ul><div class="page-nav"><a href="api-reference.html"><div class="label">← Previous</div><div class="title">API Reference</div></a></div>
-<div class="footer">Replicore v0.5.1 — Enterprise Local-First Sync for Flutter &middot; MIT License</div>
+<p style="opacity:.75;font-size:.9rem;margin-top:-.5rem">Version history</p><h2>v0.5.1</h2><ul><li>Added <code>syncTableByName(String)</code> to SyncEngine for convenience</li><li>Removed duplicate <code>HealthCheckResult</code>/<code>HealthStatus</code> from sync_manager.dart</li><li>Exported <code>sync_manager.dart</code> in barrel file</li><li>Replaced custom <code>pow()</code> with <code>dart:math</code> in realtime_subscription.dart</li><li>Fixed <code>RealtimeSubscriptionManager</code> to use <code>syncTableByName</code></li><li>Fixed <code>InMemoryMetricsCollector.recordTableMetrics()</code> double-counting bug</li><li>Fixed <code>SyncManager.syncEngine()</code> using wrong exception type</li><li>Removed unused <code>clock.dart</code></li><li>Fixed README widget API examples to match actual constructors</li></ul><h2>v0.5.0</h2><ul><li><strong>Batch Operations</strong> — 50-100× faster syncs via <code>batchUpsert</code>/<code>batchSoftDelete</code></li><li><strong>Sync Orchestration Strategies</strong> — 5 built-in strategies (Standard, OfflineFirst, StrictManual, Priority, Composite)</li><li><strong>Sealed Exception Hierarchy</strong> — <code>syncitronException</code> root with 7 specific subtypes</li><li><strong>Real-Time Subscriptions</strong> — All 4 backends (Supabase, Firebase, Appwrite, GraphQL)</li><li><strong>Multiple Storage Backends</strong> — SqfliteStore, DriftStore, HiveStore, IsarStore</li><li><strong>Multiple Remote Adapters</strong> — Supabase, Firebase Firestore, Appwrite, GraphQL</li><li><strong>SyncManager</strong> — Multi-engine coordination</li><li><strong>Diagnostics</strong> — HealthCheckResult, SystemHealth, DiagnosticsProviders</li><li><strong>UI Widgets</strong> — 6 ready-made Flutter widgets</li><li><strong>Metrics &amp; Logging</strong> — SyncMetrics, SyncSessionMetrics, structured LogEntry</li></ul><h2>v0.4.0</h2><ul><li>Supabase adapter with cursor-based pagination</li><li>Conflict resolution strategies (ServerWins, LocalWins, LastWriteWins, Custom)</li><li>Configurable retry with exponential backoff</li><li>SqfliteStore with sync column auto-migration</li></ul><div class="page-nav"><a href="api-reference.html"><div class="label">← Previous</div><div class="title">API Reference</div></a></div>
+<div class="footer">syncitron v0.5.1 — Enterprise Local-First Sync for Flutter &middot; MIT License</div>
 </main>
 </div>
 </body></html>

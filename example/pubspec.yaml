@@ -1,6 +1,6 @@
 name: todo_app
 description: >
-  Example app demonstrating Replicore offline-first sync with a simple
+  Example app demonstrating syncitron offline-first sync with a simple
   Todo list backed by SQLite (local) and Supabase (remote).
 
 publish_to: none
@@ -13,8 +13,8 @@ dependencies:
   flutter:
     sdk: flutter
 
-  # Replicore — local-first sync framework
-  replicore:
+  # syncitron — local-first sync framework
+  syncitron:
     path: ../
 
   # Local database

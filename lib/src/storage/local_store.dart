@@ -16,7 +16,7 @@ abstract class LocalStore {
 
   // ── Cursor persistence ─────────────────────────────────────────────────────
   //
-  // Cursors are stored in the local store (e.g. a `_replicore_meta` SQLite
+  // Cursors are stored in the local store (e.g. a `_syncitron_meta` SQLite
   // table) rather than SharedPreferences / NSUserDefaults.
   //
   // Rationale: SharedPreferences can be cleared by the OS or by the user

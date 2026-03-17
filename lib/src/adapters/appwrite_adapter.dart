@@ -9,7 +9,7 @@ import 'appwrite_realtime.dart';
 /// Appwrite implementation of [RemoteAdapter].
 ///
 /// Appwrite is an self-hosted or managed backend-as-a-service (BaaS)
-/// compatible with Replicore for robust sync scenarios.
+/// compatible with syncitron for robust sync scenarios.
 ///
 /// Example setup:
 /// ```dart

@@ -1,4 +1,4 @@
-import 'package:replicore/replicore.dart';
+import 'package:syncitron/syncitron.dart';
 
 /// Mock LocalStore for testing
 class MockLocalStore implements LocalStore {

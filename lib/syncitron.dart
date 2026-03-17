@@ -1,16 +1,16 @@
 /// Enterprise-grade local-first synchronization framework for Flutter.
 ///
-/// Replicore provides a robust, battle-tested foundation for building
+/// syncitron provides a robust, battle-tested foundation for building
 /// offline-capable Flutter applications with automatic data synchronization,
 /// conflict resolution, and comprehensive monitoring.
 ///
 /// ## Quick Start
 ///
 /// ```dart
-/// import 'package:replicore/replicore.dart';
+/// import 'package:syncitron/syncitron.dart';
 ///
 /// // 1. Create a config (production defaults recommended)
-/// final config = ReplicoreConfig.production();
+/// final config = syncitronConfig.production();
 ///
 /// // 2. Create engine with your database and remote adapter
 /// final engine = SyncEngine(
@@ -56,7 +56,7 @@
 /// - **Multi-Engine Management**: Coordinate multiple sync contexts
 ///
 /// See the documentation for more details on advanced features:
-/// https://github.com/leonhardWullich/replicore
+/// https://github.com/leonhardWullich/syncitron
 
 export 'src/core/config.dart';
 export 'src/core/diagnostics.dart';

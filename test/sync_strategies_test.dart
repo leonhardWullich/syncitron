@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:replicore/replicore.dart';
+import 'package:syncitron/syncitron.dart';
 import 'test_utils.dart';
 
 void main() {
@@ -44,7 +44,7 @@ void main() {
           await strategy.execute(context);
           fail('Should have thrown');
         } catch (e) {
-          expect(e, isA<ReplicoreException>());
+          expect(e, isA<syncitronException>());
         }
       });
     });
@@ -110,7 +110,7 @@ void main() {
           await strategy.execute(context);
           fail('Should have thrown');
         } catch (e) {
-          expect(e, isA<ReplicoreException>());
+          expect(e, isA<syncitronException>());
         }
       });
     });
@@ -221,7 +221,7 @@ void main() {
           await composite.execute(context);
           fail('Should have thrown');
         } catch (e) {
-          expect(e, isA<ReplicoreException>());
+          expect(e, isA<syncitronException>());
           expect(strategy3.executeCalled, false);
         }
       });

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate Replicore HTML documentation site."""
+"""Generate syncitron HTML documentation site."""
 import os, html as H
 
 OUT = os.path.dirname(os.path.abspath(__file__))
@@ -77,14 +77,14 @@ def page(filename, title, body, subtitle=""):
     return (
         '<!DOCTYPE html>\n<html lang="en">\n<head>\n'
         '<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">\n'
-        '<title>' + title + ' — Replicore Docs</title>\n'
+        '<title>' + title + ' — syncitron Docs</title>\n'
         '<link rel="stylesheet" href="assets/style.css">\n'
         '<script src="assets/app.js"></script>\n'
         '<script src="assets/search.js"></script>\n'
         '</head>\n<body>\n'
         '<div class="topbar">\n'
         '  <button class="hamburger" onclick="toggleSidebar()">☰</button>\n'
-        '  <div class="logo">Replicore <span>v0.5.1 Docs</span></div>\n'
+        '  <div class="logo">syncitron <span>v0.5.1 Docs</span></div>\n'
         '  <div class="spacer"></div>\n'
         '  <button class="search-trigger" onclick="openSearch()">🔍 Search <kbd>⌘K</kbd></button>\n'
         '  <button id="theme-btn" onclick="toggleDark()">🌙 Dark</button>\n'
@@ -105,7 +105,7 @@ def page(filename, title, body, subtitle=""):
         + sub +
         body +
         prev_next(filename) + '\n'
-        '<div class="footer">Replicore v0.5.1 — Enterprise Local-First Sync for Flutter &middot; MIT License</div>\n'
+        '<div class="footer">syncitron v0.5.1 — Enterprise Local-First Sync for Flutter &middot; MIT License</div>\n'
         '</main>\n</div>\n</body></html>'
     )
 
@@ -135,10 +135,10 @@ def write(filename, title, body, subtitle=""):
     print("  ✓ " + filename)
 
 # ═══════════════════════════════════════════════════════════════════════════════
-print("Generating Replicore documentation…")
+print("Generating syncitron documentation…")
 
 # ── 1. HOME ──────────────────────────────────────────────────────────────────
-write("index.html", "Replicore Documentation",
+write("index.html", "syncitron Documentation",
 '<p style="font-size:1.15rem;color:var(--c-text-muted);margin-bottom:2rem">'
 'Enterprise-grade local-first synchronization framework for Flutter.<br>'
 'Build offline-capable apps with automatic sync, conflict resolution, and comprehensive monitoring.'
@@ -156,11 +156,11 @@ write("index.html", "Replicore Documentation",
 '</div>'
 
 '<h2>Quick Install</h2>'
-+ bash("flutter pub add replicore") +
++ bash("flutter pub add syncitron") +
 
 '<h2>Minimal Example</h2>'
 + dart(
-"import 'package:replicore/replicore.dart';\n"
+"import 'package:syncitron/syncitron.dart';\n"
 "import 'package:sqflite/sqflite.dart';\n"
 "import 'package:supabase_flutter/supabase_flutter.dart';\n\n"
 "final engine = SyncEngine(\n"
@@ -170,7 +170,7 @@ write("index.html", "Replicore Documentation",
 "    localStore: sqfliteStore,\n"
 "    postgresChangeEventAll: PostgresChangeEvent.all,\n"
 "  ),\n"
-"  config:        ReplicoreConfig.production(),\n"
+"  config:        syncitronConfig.production(),\n"
 "  logger:        ConsoleLogger(),\n"
 ");\n\n"
 "engine.registerTable(TableConfig(\n"
@@ -189,7 +189,7 @@ write("index.html", "Replicore Documentation",
   ["<a href='architecture.html'>Architecture</a>", "Engine, stores, adapters, data flow"],
   ["<a href='sync-engine.html'>Sync Engine</a>", "Core API: init, syncAll, syncTable, registerTable"],
   ["<a href='sync-conflicts.html'>Conflict Resolution</a>", "4 strategies with examples"],
-  ["<a href='configuration.html'>Configuration</a>", "ReplicoreConfig presets and custom tuning"],
+  ["<a href='configuration.html'>Configuration</a>", "syncitronConfig presets and custom tuning"],
   ["<a href='error-handling.html'>Error Handling</a>", "Sealed exception hierarchy"],
   ["<a href='metrics-logging.html'>Metrics &amp; Logging</a>", "SyncMetrics, Loggers, MetricsCollector"],
   ["Backends", "<a href='backend-supabase.html'>Supabase</a> · <a href='backend-firebase.html'>Firebase</a> · <a href='backend-appwrite.html'>Appwrite</a> · <a href='backend-graphql.html'>GraphQL</a>"],
@@ -215,15 +215,15 @@ write("getting-started.html", "Quick Start",
 '</ul></div>'
 
 '<h2 id="install">1. Installation</h2>'
-+ bash("flutter pub add replicore") +
++ bash("flutter pub add syncitron") +
 '<p>Or add manually to <code>pubspec.yaml</code>:</p>'
 + yaml(
 "dependencies:\n"
-"  replicore: ^0.5.1\n"
+"  syncitron: ^0.5.1\n"
 "  sqflite: ^2.4.2            # local store (user dependency)\n"
 "  supabase_flutter: ^2.12.0  # remote backend (user dependency)"
 ) +
-callout("info", "Replicore has <strong>zero third-party dependencies</strong>. All backend packages (Supabase, Firebase, Appwrite, GraphQL) and local stores (sqflite, Drift, Hive, Isar) are optional — add only the ones you actually use to your own <code>pubspec.yaml</code>.") +
+callout("info", "syncitron has <strong>zero third-party dependencies</strong>. All backend packages (Supabase, Firebase, Appwrite, GraphQL) and local stores (sqflite, Drift, Hive, Isar) are optional — add only the ones you actually use to your own <code>pubspec.yaml</code>.") +
 
 '<h2 id="setup-db">2. Set Up Local Database</h2>'
 + dart(
@@ -245,11 +245,11 @@ callout("info", "Replicore has <strong>zero third-party dependencies</strong>. A
 "  },\n"
 ");"
 ) +
-callout("info", "Replicore automatically adds <code>is_synced</code> and <code>op_id</code> columns via <code>ensureSyncColumns()</code> during <code>engine.init()</code>. You do not need to create them manually.") +
+callout("info", "syncitron automatically adds <code>is_synced</code> and <code>op_id</code> columns via <code>ensureSyncColumns()</code> during <code>engine.init()</code>. You do not need to create them manually.") +
 
 '<h2 id="create-engine">3. Create the Sync Engine</h2>'
 + dart(
-"import 'package:replicore/replicore.dart';\n"
+"import 'package:syncitron/syncitron.dart';\n"
 "import 'package:sqflite/sqflite.dart';\n"
 "import 'package:supabase_flutter/supabase_flutter.dart';\n\n"
 "final localStore = SqfliteStore(db, conflictAlgorithm: ConflictAlgorithm.replace);\n\n"
@@ -262,7 +262,7 @@ callout("info", "Replicore automatically adds <code>is_synced</code> and <code>o
 "final engine = SyncEngine(\n"
 "  localStore:       localStore,\n"
 "  remoteAdapter:    remoteAdapter,\n"
-"  config:           ReplicoreConfig.production(),\n"
+"  config:           syncitronConfig.production(),\n"
 "  logger:           ConsoleLogger(minLevel: LogLevel.info),\n"
 "  metricsCollector: InMemoryMetricsCollector(),\n"
 ");"
@@ -305,7 +305,7 @@ subtitle="Your first offline-first sync in 5 minutes"
 
 # ── 3. ARCHITECTURE ──────────────────────────────────────────────────────────
 write("architecture.html", "Architecture",
-'<p>Replicore follows a clean, layered architecture with dependency injection throughout.</p>'
+'<p>syncitron follows a clean, layered architecture with dependency injection throughout.</p>'
 
 '<h2>High-Level Data Flow</h2>'
 '<pre><code>'
@@ -354,7 +354,7 @@ write("architecture.html", "Architecture",
   ["<code>GraphQLAdapter</code>","Any GraphQL server","✅ via Subscriptions"],
 ]) +
 
-'<h3>ReplicoreConfig</h3>'
+'<h3>syncitronConfig</h3>'
 '<p>Immutable configuration controlling batch sizes, retry policies, timeouts, and feature flags. Three presets: <code>production()</code>, <code>development()</code>, <code>testing()</code>.</p>'
 
 '<h3>TableConfig</h3>'
@@ -375,23 +375,23 @@ write("architecture.html", "Architecture",
 'SyncEngine\n'
 '  ├── LocalStore          (required)\n'
 '  ├── RemoteAdapter       (required)\n'
-'  ├── ReplicoreConfig     (optional — defaults to ReplicoreConfig())\n'
+'  ├── syncitronConfig     (optional — defaults to syncitronConfig())\n'
 '  ├── Logger              (optional — defaults to ConsoleLogger())\n'
 '  └── MetricsCollector    (optional — defaults to InMemoryMetricsCollector())'
 '</code></pre>',
-subtitle="How Replicore is structured"
+subtitle="How syncitron is structured"
 )
 
 # ── 4. SYNC ENGINE ───────────────────────────────────────────────────────────
 write("sync-engine.html", "Sync Engine",
-'<p>The <code>SyncEngine</code> is the central class of Replicore. It orchestrates pulling, pushing, conflict resolution, metrics, and status updates.</p>'
+'<p>The <code>SyncEngine</code> is the central class of syncitron. It orchestrates pulling, pushing, conflict resolution, metrics, and status updates.</p>'
 
 '<h2>Constructor</h2>'
 + dart(
 "SyncEngine({\n"
 "  required LocalStore localStore,\n"
 "  required RemoteAdapter remoteAdapter,\n"
-"  ReplicoreConfig? config,            // default: ReplicoreConfig()\n"
+"  syncitronConfig? config,            // default: syncitronConfig()\n"
 "  Logger? logger,                     // default: ConsoleLogger()\n"
 "  MetricsCollector? metricsCollector,  // default: InMemoryMetricsCollector()\n"
 "})"
@@ -436,7 +436,7 @@ subtitle="Core orchestrator for all sync operations"
 
 # ── 5. CONFLICT RESOLUTION ───────────────────────────────────────────────────
 write("sync-conflicts.html", "Conflict Resolution",
-'<p>A conflict occurs when a record was modified both locally and remotely since the last sync. Replicore supports four strategies, configured per table.</p>'
+'<p>A conflict occurs when a record was modified both locally and remotely since the last sync. syncitron supports four strategies, configured per table.</p>'
 
 '<h2>SyncStrategy Enum</h2>'
 + tbl(["Strategy","Behaviour","Use Case"], [
@@ -488,13 +488,13 @@ subtitle="ServerWins · LocalWins · LastWriteWins · Custom"
 
 # ── 6. CONFIGURATION ─────────────────────────────────────────────────────────
 write("configuration.html", "Configuration",
-'<p><code>ReplicoreConfig</code> is an immutable class controlling engine behaviour. Three factory constructors provide sensible presets.</p>'
+'<p><code>syncitronConfig</code> is an immutable class controlling engine behaviour. Three factory constructors provide sensible presets.</p>'
 
 '<h2>Presets</h2>'
 + dart(
-"ReplicoreConfig.production()   // large batches, aggressive retries\n"
-"ReplicoreConfig.development()  // small batches, detailed logging\n"
-"ReplicoreConfig.testing()      // minimal overhead, no logging/metrics"
+"syncitronConfig.production()   // large batches, aggressive retries\n"
+"syncitronConfig.development()  // small batches, detailed logging\n"
+"syncitronConfig.testing()      // minimal overhead, no logging/metrics"
 ) +
 
 '<h2>All Parameters</h2>'
@@ -516,7 +516,7 @@ write("configuration.html", "Configuration",
 
 '<h2>Custom Configuration</h2>'
 + dart(
-"final config = ReplicoreConfig(\n"
+"final config = syncitronConfig(\n"
 "  batchSize: 1000,\n"
 "  maxRetries: 5,\n"
 "  initialRetryDelay: Duration(seconds: 1),\n"
@@ -529,7 +529,7 @@ write("configuration.html", "Configuration",
 '<h2>copyWith</h2>'
 '<p>Create a modified copy without mutating the original:</p>'
 + dart(
-"final custom = ReplicoreConfig.production().copyWith(\n"
+"final custom = syncitronConfig.production().copyWith(\n"
 "  batchSize: 2000,\n"
 "  enableDetailedLogging: true,\n"
 ");"
@@ -543,16 +543,16 @@ write("configuration.html", "Configuration",
 '<li><code>initialRetryDelay</code> &gt; 0</li>'
 '<li><code>maxRetryDelay</code> &gt;= <code>initialRetryDelay</code></li>'
 '</ul>',
-subtitle="ReplicoreConfig — presets and tuning"
+subtitle="syncitronConfig — presets and tuning"
 )
 
 # ── 7. ERROR HANDLING ─────────────────────────────────────────────────────────
 write("error-handling.html", "Error Handling",
-'<p>Replicore uses a <strong>sealed exception hierarchy</strong> rooted at <code>ReplicoreException</code>. You can pattern-match on specific types for granular error handling.</p>'
+'<p>syncitron uses a <strong>sealed exception hierarchy</strong> rooted at <code>syncitronException</code>. You can pattern-match on specific types for granular error handling.</p>'
 
 '<h2>Exception Hierarchy</h2>'
 '<pre><code>'
-'ReplicoreException  (sealed)\n'
+'syncitronException  (sealed)\n'
 '  ├── SyncNetworkException       — network / timeout / server error\n'
 '  ├── SyncAuthException          — 401/403, session expired\n'
 '  ├── ConflictResolutionException — custom resolver threw\n'
@@ -577,8 +577,8 @@ write("error-handling.html", "Error Handling",
 "  reportFatalError(e);\n"
 "} on LocalStoreException catch (e) {\n"
 "  showError('Database error: ${e.message}');\n"
-"} on ReplicoreException catch (e) {\n"
-"  // catch-all for any Replicore error\n"
+"} on syncitronException catch (e) {\n"
+"  // catch-all for any syncitron error\n"
 "  showError('Sync error: ${e.message}');\n"
 "}"
 ) +
@@ -676,7 +676,7 @@ write("metrics-logging.html", "Metrics & Logging",
 ]) +
 
 '<h2>Logging</h2>'
-'<p>Replicore provides a pluggable <code>Logger</code> interface with three built-in implementations.</p>'
+'<p>syncitron provides a pluggable <code>Logger</code> interface with three built-in implementations.</p>'
 
 '<h3>Logger Implementations</h3>'
 + tbl(["Class","Behaviour"], [
@@ -726,17 +726,17 @@ subtitle="Track performance and debug sync flows"
 
 # ── 9. BACKEND: SUPABASE ─────────────────────────────────────────────────────
 write("backend-supabase.html", "Supabase Backend",
-'<p><code>SupabaseAdapter</code> connects Replicore to a Supabase PostgreSQL backend. It supports cursor-based pagination, native batch upserts, and real-time subscriptions via WebSocket.</p>'
+'<p><code>SupabaseAdapter</code> connects syncitron to a Supabase PostgreSQL backend. It supports cursor-based pagination, native batch upserts, and real-time subscriptions via WebSocket.</p>'
 
 '<h2>Setup</h2>'
 + yaml(
 "dependencies:\n"
-"  replicore: ^0.5.1\n"
+"  syncitron: ^0.5.1\n"
 "  supabase_flutter: ^2.12.0\n"
 "  sqflite: ^2.4.2"
 ) +
 dart(
-"import 'package:replicore/replicore.dart';\n"
+"import 'package:syncitron/syncitron.dart';\n"
 "import 'package:supabase_flutter/supabase_flutter.dart';\n\n"
 "final adapter = SupabaseAdapter(\n"
 "  client: Supabase.instance.client,\n"
@@ -748,13 +748,13 @@ dart(
 ) +
 
 '<h2>Required Database Schema</h2>'
-'<p>Every table synced with Replicore must have these columns on Supabase:</p>'
+'<p>Every table synced with syncitron must have these columns on Supabase:</p>'
 + sql(
 "CREATE TABLE todos (\n"
 "  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n"
 "  title TEXT NOT NULL,\n"
 "  completed BOOLEAN DEFAULT false,\n"
-"  -- Required by Replicore:\n"
+"  -- Required by syncitron:\n"
 "  updated_at TIMESTAMPTZ DEFAULT now(),\n"
 "  deleted_at TIMESTAMPTZ NULL\n"
 ");\n\n"
@@ -798,13 +798,13 @@ write("backend-firebase.html", "Firebase Firestore Backend",
 '<h2>Setup</h2>'
 + yaml(
 "dependencies:\n"
-"  replicore: ^0.5.1\n"
+"  syncitron: ^0.5.1\n"
 "  firebase_core: ^2.24.0\n"
 "  cloud_firestore: ^4.13.0"
 ) +
 dart(
 "import 'package:cloud_firestore/cloud_firestore.dart';\n"
-"import 'package:replicore/replicore.dart';\n\n"
+"import 'package:syncitron/syncitron.dart';\n\n"
 "final adapter = FirebaseFirestoreAdapter(\n"
 "  firestore: FirebaseFirestore.instance,\n"
 "  localStore: sqfliteStore,\n"
@@ -847,12 +847,12 @@ write("backend-appwrite.html", "Appwrite Backend",
 '<h2>Setup</h2>'
 + yaml(
 "dependencies:\n"
-"  replicore: ^0.5.1\n"
+"  syncitron: ^0.5.1\n"
 "  appwrite: ^11.0.0"
 ) +
 dart(
 "import 'package:appwrite/appwrite.dart';\n"
-"import 'package:replicore/replicore.dart';\n\n"
+"import 'package:syncitron/syncitron.dart';\n\n"
 "final client = Client()\n"
 "  ..setEndpoint('https://cloud.appwrite.io/v1')\n"
 "  ..setProject('your-project-id');\n\n"
@@ -892,17 +892,17 @@ subtitle="Self-hosted BaaS with WebSocket real-time"
 
 # ── 12. BACKEND: GRAPHQL ─────────────────────────────────────────────────────
 write("backend-graphql.html", "GraphQL Backend",
-'<p><code>GraphQLAdapter</code> works with any GraphQL server (Hasura, Apollo, Supabase GraphQL, custom). You provide query/mutation builders; Replicore handles the sync logic.</p>'
+'<p><code>GraphQLAdapter</code> works with any GraphQL server (Hasura, Apollo, Supabase GraphQL, custom). You provide query/mutation builders; syncitron handles the sync logic.</p>'
 
 '<h2>Setup</h2>'
 + yaml(
 "dependencies:\n"
-"  replicore: ^0.5.1\n"
+"  syncitron: ^0.5.1\n"
 "  graphql: ^5.1.0"
 ) +
 dart(
 "import 'package:graphql/client.dart';\n"
-"import 'package:replicore/replicore.dart';\n\n"
+"import 'package:syncitron/syncitron.dart';\n\n"
 "final graphqlClient = GraphQLClient(\n"
 "  link: HttpLink('https://your-server.com/graphql'),\n"
 "  cache: GraphQLCache(),\n"
@@ -969,7 +969,7 @@ write("storage-sqflite.html", "SQLite Storage (sqflite)",
 '<h2>Setup</h2>'
 + dart(
 "import 'package:sqflite/sqflite.dart';\n"
-"import 'package:replicore/replicore.dart';\n\n"
+"import 'package:syncitron/syncitron.dart';\n\n"
 "final db = await openDatabase('myapp.db', version: 1, onCreate: (db, v) async {\n"
 "  await db.execute('CREATE TABLE todos (id TEXT PRIMARY KEY, title TEXT, ...)');\n"
 "});\n\n"
@@ -985,7 +985,7 @@ write("storage-sqflite.html", "SQLite Storage (sqflite)",
 '<p><code>ensureSyncColumns()</code> (called during <code>engine.init()</code>) checks if <code>is_synced</code> and <code>op_id</code> columns exist and adds them via <code>ALTER TABLE</code> if missing.</p>'
 
 '<h2>Cursor Persistence</h2>'
-'<p>Sync cursors are stored in a private <code>_replicore_meta</code> table, created automatically. This table maps table names to their last-synced <code>updated_at</code> + <code>primaryKey</code> pair.</p>'
+'<p>Sync cursors are stored in a private <code>_syncitron_meta</code> table, created automatically. This table maps table names to their last-synced <code>updated_at</code> + <code>primaryKey</code> pair.</p>'
 
 '<h2>Batch Optimisations</h2>'
 '<ul>'
@@ -1003,12 +1003,12 @@ write("storage-drift.html", "Drift Storage",
 '<h2>Setup</h2>'
 + yaml(
 "dependencies:\n"
-"  replicore: ^0.5.1\n"
+"  syncitron: ^0.5.1\n"
 "  drift: ^2.14.0\n"
 "  sqlite3_flutter_libs: ^0.5.0"
 ) +
 dart(
-"import 'package:replicore/replicore.dart';\n\n"
+"import 'package:syncitron/syncitron.dart';\n\n"
 "final store = DriftStore(\n"
 "  tables: {'todos': todosTable, 'projects': projectsTable},\n"
 "  readMetadataQuery: (table) => metadataDao.read(table),\n"
@@ -1026,7 +1026,7 @@ dart(
   ["<code>isSyncedColumn</code>","<code>String</code>","Column name (default: <code>'is_synced'</code>)"],
   ["<code>operationIdColumn</code>","<code>String</code>","Column name (default: <code>'op_id'</code>)"],
 ]) +
-callout("warn", "Your Drift schema <strong>must</strong> include <code>is_synced</code> (int) and <code>op_id</code> (text) columns. Replicore cannot add them at runtime."),
+callout("warn", "Your Drift schema <strong>must</strong> include <code>is_synced</code> (int) and <code>op_id</code> (text) columns. syncitron cannot add them at runtime."),
 subtitle="Type-safe SQL with compile-time safety"
 )
 
@@ -1037,14 +1037,14 @@ write("storage-hive.html", "Hive Storage",
 '<h2>Setup</h2>'
 + yaml(
 "dependencies:\n"
-"  replicore: ^0.5.1\n"
+"  syncitron: ^0.5.1\n"
 "  hive_flutter: ^1.1.0"
 ) +
 dart(
 "import 'package:hive_flutter/hive_flutter.dart';\n"
-"import 'package:replicore/replicore.dart';\n\n"
+"import 'package:syncitron/syncitron.dart';\n\n"
 "await Hive.initFlutter();\n"
-"final metadataBox = await Hive.openBox('replicore_meta');\n\n"
+"final metadataBox = await Hive.openBox('syncitron_meta');\n\n"
 "final store = HiveStore(\n"
 "  metadataBox: metadataBox,\n"
 "  dataBoxFactory: (table) => Hive.openBox(table),\n"
@@ -1069,13 +1069,13 @@ write("storage-isar.html", "Isar Storage",
 '<h2>Setup</h2>'
 + yaml(
 "dependencies:\n"
-"  replicore: ^0.5.1\n"
+"  syncitron: ^0.5.1\n"
 "  isar: ^3.1.0\n"
 "  isar_flutter_libs: ^3.1.0"
 ) +
 dart(
 "import 'package:isar/isar.dart';\n"
-"import 'package:replicore/replicore.dart';\n\n"
+"import 'package:syncitron/syncitron.dart';\n\n"
 "final isar = await Isar.open([TodoSchema, ProjectSchema]);\n\n"
 "final store = IsarStore(\n"
 "  isar: isar,\n"
@@ -1096,7 +1096,7 @@ subtitle="Rust-backed high-performance embedded database"
 
 # ── 17. ORCHESTRATION ─────────────────────────────────────────────────────────
 write("orchestration.html", "Sync Orchestration",
-'<p>For advanced sync flows beyond the default pull-push pattern, Replicore provides <code>SyncOrchestrationStrategy</code> — a pluggable lifecycle for custom sync orchestrations.</p>'
+'<p>For advanced sync flows beyond the default pull-push pattern, syncitron provides <code>SyncOrchestrationStrategy</code> — a pluggable lifecycle for custom sync orchestrations.</p>'
 
 '<h2>How It Works</h2>'
 + dart(
@@ -1183,7 +1183,7 @@ subtitle="5 built-in strategies + custom orchestration"
 
 # ── 18. REAL-TIME ─────────────────────────────────────────────────────────────
 write("realtime.html", "Real-Time Sync",
-'<p>Replicore supports event-driven real-time synchronization for all four backends. When data changes on the server, the client syncs automatically — no polling needed.</p>'
+'<p>syncitron supports event-driven real-time synchronization for all four backends. When data changes on the server, the client syncs automatically — no polling needed.</p>'
 
 '<h2>Architecture</h2>'
 '<pre><code>'
@@ -1255,7 +1255,7 @@ subtitle="Event-driven sync with auto-reconnect"
 
 # ── 19. UI WIDGETS ────────────────────────────────────────────────────────────
 write("widgets.html", "UI Widgets",
-'<p>Replicore ships 6 ready-made Flutter widgets for displaying sync status, errors, and metrics.</p>'
+'<p>syncitron ships 6 ready-made Flutter widgets for displaying sync status, errors, and metrics.</p>'
 
 '<h2>SyncStatusWidget</h2>'
 '<p>Displays sync status from the engine\'s <code>statusStream</code>.</p>'
@@ -1292,17 +1292,17 @@ tbl(["Prop","Type","Default"], [
 ]) +
 
 '<h2>SyncErrorBanner</h2>'
-'<p>Context-aware error banner using Dart 3 pattern matching on the sealed <code>ReplicoreException</code> hierarchy.</p>'
+'<p>Context-aware error banner using Dart 3 pattern matching on the sealed <code>syncitronException</code> hierarchy.</p>'
 + dart(
 "SyncErrorBanner(\n"
-"  error: currentError,   // ReplicoreException?\n"
+"  error: currentError,   // syncitronException?\n"
 "  onRetry: () => engine.syncAll(),\n"
 "  onDismiss: () => setState(() => currentError = null),\n"
 "  customMessage: null,   // optional override text\n"
 ")"
 ) +
 tbl(["Prop","Type","Default"], [
-  ["<code>error</code>","<code>ReplicoreException?</code>","required"],
+  ["<code>error</code>","<code>syncitronException?</code>","required"],
   ["<code>onRetry</code>","<code>VoidCallback?</code>","null"],
   ["<code>onDismiss</code>","<code>VoidCallback?</code>","null"],
   ["<code>customMessage</code>","<code>String?</code>","null"],
@@ -1355,7 +1355,7 @@ tbl(["Prop","Type","Default"], [
   ["<code>statusStream</code>","<code>Stream&lt;String&gt;</code>","required"],
   ["<code>onSync</code>","<code>VoidCallback</code>","required"],
   ["<code>metrics</code>","<code>SyncSessionMetrics?</code>","null"],
-  ["<code>error</code>","<code>ReplicoreException?</code>","null"],
+  ["<code>error</code>","<code>syncitronException?</code>","null"],
   ["<code>onErrorDismiss</code>","<code>VoidCallback?</code>","null"],
   ["<code>showMetrics</code>","<code>bool</code>","true"],
   ["<code>showButton</code>","<code>bool</code>","true"],
@@ -1410,7 +1410,7 @@ subtitle="Coordinate multiple SyncEngine instances"
 
 # ── 21. DIAGNOSTICS ───────────────────────────────────────────────────────────
 write("diagnostics.html", "Health & Diagnostics",
-'<p>Replicore provides a diagnostics subsystem for monitoring the health of your sync infrastructure.</p>'
+'<p>syncitron provides a diagnostics subsystem for monitoring the health of your sync infrastructure.</p>'
 
 '<h2>HealthCheckResult</h2>'
 + dart(
@@ -1481,11 +1481,11 @@ subtitle="Monitor sync infrastructure health"
 
 # ── 22. TESTING ───────────────────────────────────────────────────────────────
 write("testing.html", "Testing",
-'<p>Replicore\'s architecture is fully testable via dependency injection. All core interfaces have in-memory or mock implementations.</p>'
+'<p>syncitron\'s architecture is fully testable via dependency injection. All core interfaces have in-memory or mock implementations.</p>'
 
 '<h2>Test Configuration</h2>'
 + dart(
-"final config = ReplicoreConfig.testing();\n"
+"final config = syncitronConfig.testing();\n"
 "// Minimal overhead: no logging, no metrics, fast timeouts"
 ) +
 
@@ -1549,7 +1549,7 @@ write("testing.html", "Testing",
 "  final engine = SyncEngine(\n"
 "    localStore: local,\n"
 "    remoteAdapter: remote,\n"
-"    config: ReplicoreConfig.testing(),\n"
+"    config: syncitronConfig.testing(),\n"
 "    logger: NoOpLogger(),\n"
 "  );\n\n"
 "  engine.registerTable(TableConfig(\n"
@@ -1566,10 +1566,10 @@ subtitle="Dependency injection for fully testable sync"
 
 # ── 23. API REFERENCE ─────────────────────────────────────────────────────────
 write("api-reference.html", "API Reference",
-'<p>Complete class and method reference for Replicore v0.5.1. Organized by module.</p>'
+'<p>Complete class and method reference for syncitron v0.5.1. Organized by module.</p>'
 
 '<div class="toc"><h4>Modules</h4><ul>'
-'<li><a href="#core">Core</a> — SyncEngine, ReplicoreConfig, TableConfig, Models</li>'
+'<li><a href="#core">Core</a> — SyncEngine, syncitronConfig, TableConfig, Models</li>'
 '<li><a href="#strategy">Strategy &amp; Conflict</a> — SyncStrategy, ConflictResolution, Orchestration</li>'
 '<li><a href="#exceptions">Exceptions</a> — Sealed exception hierarchy</li>'
 '<li><a href="#logging">Logging &amp; Metrics</a> — Logger, MetricsCollector, LogEntry</li>'
@@ -1589,7 +1589,7 @@ write("api-reference.html", "API Reference",
 "SyncEngine({\n"
 "  required LocalStore localStore,\n"
 "  required RemoteAdapter remoteAdapter,\n"
-"  ReplicoreConfig? config,\n"
+"  syncitronConfig? config,\n"
 "  Logger? logger,\n"
 "  MetricsCollector? metricsCollector,\n"
 "})"
@@ -1605,9 +1605,9 @@ tbl(["Method","Signature"], [
   ["statusStream","<code>Stream&lt;String&gt; get statusStream</code>"],
 ]) +
 
-'<h3>ReplicoreConfig</h3>'
+'<h3>syncitronConfig</h3>'
 + dart(
-"const ReplicoreConfig({\n"
+"const syncitronConfig({\n"
 "  int batchSize = 500,\n"
 "  int maxConcurrentSyncs = 1,\n"
 "  Duration operationTimeout = const Duration(seconds: 30),\n"
@@ -1622,11 +1622,11 @@ tbl(["Method","Signature"], [
 "  bool collectMetrics = true,\n"
 "  bool validateOnCreation = true,\n"
 "})\n\n"
-"factory ReplicoreConfig.production()\n"
-"factory ReplicoreConfig.development()\n"
-"factory ReplicoreConfig.testing()\n\n"
+"factory syncitronConfig.production()\n"
+"factory syncitronConfig.development()\n"
+"factory syncitronConfig.testing()\n\n"
 "void validate()\n"
-"ReplicoreConfig copyWith({...})\n"
+"syncitronConfig copyWith({...})\n"
 "Map<String, dynamic> toJson()"
 ) +
 
@@ -1699,7 +1699,7 @@ tbl(["Method","Signature"], [
 
 '<h2 id="exceptions">Exceptions</h2>'
 + tbl(["Exception","Key Fields"], [
-  ["<code>ReplicoreException</code> (sealed)","message, cause"],
+  ["<code>syncitronException</code> (sealed)","message, cause"],
   ["<code>SyncNetworkException</code>","table, statusCode, isOffline"],
   ["<code>SyncAuthException</code>","table"],
   ["<code>ConflictResolutionException</code>","table, primaryKey"],
@@ -1839,7 +1839,7 @@ write("changelog.html", "Changelog",
 '<ul>'
 '<li><strong>Batch Operations</strong> — 50-100× faster syncs via <code>batchUpsert</code>/<code>batchSoftDelete</code></li>'
 '<li><strong>Sync Orchestration Strategies</strong> — 5 built-in strategies (Standard, OfflineFirst, StrictManual, Priority, Composite)</li>'
-'<li><strong>Sealed Exception Hierarchy</strong> — <code>ReplicoreException</code> root with 7 specific subtypes</li>'
+'<li><strong>Sealed Exception Hierarchy</strong> — <code>syncitronException</code> root with 7 specific subtypes</li>'
 '<li><strong>Real-Time Subscriptions</strong> — All 4 backends (Supabase, Firebase, Appwrite, GraphQL)</li>'
 '<li><strong>Multiple Storage Backends</strong> — SqfliteStore, DriftStore, HiveStore, IsarStore</li>'
 '<li><strong>Multiple Remote Adapters</strong> — Supabase, Firebase Firestore, Appwrite, GraphQL</li>'

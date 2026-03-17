@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:replicore/replicore.dart';
+import 'package:syncitron/syncitron.dart';
 
 /// Displays the current sync status with customizable UI.
 ///
@@ -204,7 +204,7 @@ class _MetricsRow extends StatelessWidget {
 /// ```
 class SyncErrorBanner extends StatelessWidget {
   /// The sync error to display (null hides the banner).
-  final ReplicoreException? error;
+  final syncitronException? error;
 
   /// Callback when user taps Retry button.
   final VoidCallback? onRetry;
@@ -407,7 +407,7 @@ class SyncStatusPanel extends StatelessWidget {
   final SyncSessionMetrics? metrics;
 
   /// Current error (if any).
-  final ReplicoreException? error;
+  final syncitronException? error;
 
   /// Callback for manual sync.
   final VoidCallback onSync;

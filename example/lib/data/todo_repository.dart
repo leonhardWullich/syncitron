@@ -8,7 +8,7 @@ import 'todo.dart';
 /// singleton needed. This also makes the repository trivially testable:
 /// just pass an in-memory database in tests.
 ///
-/// This class knows nothing about Replicore. It only needs to:
+/// This class knows nothing about syncitron. It only needs to:
 ///   1. Set `is_synced = 0` on every write (marks the record as dirty).
 ///   2. Set `updated_at` on every write (used by lastWriteWins resolution).
 ///
@@ -36,7 +36,7 @@ class TodoRepository {
   /// Inserts a new todo.
   ///
   /// [Todo.create] already sets `is_synced = 0` and `updated_at = now()`,
-  /// so Replicore will push this record on the next sync.
+  /// so syncitron will push this record on the next sync.
   Future<void> insert(Todo todo) async {
     await _db.insert(
       'todos',
@@ -59,7 +59,7 @@ class TodoRepository {
 
   /// Soft-deletes a todo by setting `deleted_at`.
   ///
-  /// The record stays in SQLite so Replicore can push the deletion to
+  /// The record stays in SQLite so syncitron can push the deletion to
   /// Supabase on the next sync. Other clients pull the `deleted_at` value
   /// and filter it out.
   Future<void> softDelete(Todo todo) async {

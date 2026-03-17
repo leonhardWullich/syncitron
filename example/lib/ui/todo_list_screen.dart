@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:replicore/replicore.dart';
+import 'package:syncitron/syncitron.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../data/todo.dart';
 import '../data/todo_repository.dart';
+import '../main.dart'; // for appRealtimeManager
 import '../sync/sync_service.dart';
 
 class TodoListScreen extends StatefulWidget {
@@ -198,6 +199,25 @@ class _TodoListScreenState extends State<TodoListScreen> {
         title: const Text('My Todos'),
         elevation: 0,
         actions: [
+          // Real-Time connection indicator
+          if (appRealtimeManager != null)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: Center(
+                child: Tooltip(
+                  message: appRealtimeManager!.isConnected
+                      ? 'Real-time sync active'
+                      : 'Real-time disconnected',
+                  child: Icon(
+                    Icons.wifi,
+                    size: 18,
+                    color: appRealtimeManager!.isConnected
+                        ? Colors.lightGreenAccent
+                        : Colors.white38,
+                  ),
+                ),
+              ),
+            ),
           // Sync button with metrics display
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -248,7 +268,7 @@ class _TodoListScreenState extends State<TodoListScreen> {
       body: Column(
         children: [
           // ── Sync status/error banner ───────────────────────────────────────
-          ValueListenableBuilder<ReplicoreException?>(
+          ValueListenableBuilder<syncitronException?>(
             valueListenable: SyncService.instance.syncError,
             builder: (_, error, __) {
               if (error == null) return const SizedBox.shrink();

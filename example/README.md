@@ -1,12 +1,12 @@
-# Replicore Example: Todo App
+# syncitron Example: Todo App
 
-A fully-featured Flutter example demonstrating Replicore v0.5.1 (Performance Release) with offline-first synchronization, real-time updates, batch operations, structured logging, metrics collection, and comprehensive error handling.
+A fully-featured Flutter example demonstrating syncitron v0.5.1 (Performance Release) with offline-first synchronization, real-time updates, batch operations, structured logging, metrics collection, and comprehensive error handling.
 
 ## 📋 Project Structure
 
 ```
 lib/
-├── main.dart                     # App entry point with Replicore v0.5.0 setup
+├── main.dart                     # App entry point with syncitron v0.5.0 setup
 ├── data/
 │   ├── todo.dart                 # Data model with sync metadata
 │   └── todo_repository.dart      # Database abstraction layer
@@ -19,8 +19,8 @@ lib/
 
 ## 🚀 What This Example Demonstrates
 
-### 1. **Replicore v0.5.0 Setup** (`main.dart`)
-- ✅ Creating `ReplicoreConfig` with production preset
+### 1. **syncitron v0.5.0 Setup** (`main.dart`)
+- ✅ Creating `syncitronConfig` with production preset
 - ✅ Structured logging with `ConsoleLogger`
 - ✅ Metrics collection with `InMemoryMetricsCollector`
 - ✅ Error handling during initialization
@@ -107,20 +107,20 @@ try {
 
 ## 🔧 Key Configuration Options
 
-### ReplicoreConfig Presets
+### syncitronConfig Presets
 
 ```dart
 // Production: Conservative settings, structured logging
-final config = ReplicoreConfig.production();
+final config = syncitronConfig.production();
 
 // Development: Verbose logging, faster retries
-final config = ReplicoreConfig.development();
+final config = syncitronConfig.development();
 
 // Testing: In-memory, no network I/O
-final config = ReplicoreConfig.testing();
+final config = syncitronConfig.testing();
 
 // Custom: Full control
-final config = ReplicoreConfig(
+final config = syncitronConfig(
   batchSize: 100,
   retryStrategy: ExponentialBackoff(maxDelaySeconds: 300),
   conflictResolution: ConflictResolution.lastWriteWins,
@@ -168,7 +168,7 @@ print('Duration: ${sessionMetrics.totalDuration}');
                            │
                            ▼
             ┌──────────────────────────┐
-            │ Initialize Replicore     │
+            │ Initialize syncitron     │
             │ - Config: production()   │
             │ - Logger: ConsoleLogger  │
             │ - Metrics: collector     │
@@ -269,7 +269,7 @@ print('Duration: ${sessionMetrics.totalDuration}');
 
 ## 📝 License
 
-This example is part of Replicore. See [../LICENSE](../LICENSE).
+This example is part of syncitron. See [../LICENSE](../LICENSE).
 
 Replace the two placeholders in `lib/main.dart`:
 ```dart
@@ -290,10 +290,10 @@ flutter run
 ### Optimistic UI
 Writes go directly to SQLite with `is_synced = 0`. The UI reloads from
 SQLite immediately so the user sees their changes without waiting for the
-network. Replicore pushes dirty records to Supabase on the next sync.
+network. syncitron pushes dirty records to Supabase on the next sync.
 
 ### Offline banner
-`SyncService.syncError` is a `ValueNotifier<ReplicoreException?>`.
+`SyncService.syncError` is a `ValueNotifier<syncitronException?>`.
 The UI uses a `ValueListenableBuilder` to react to typed errors:
 
 ```dart
@@ -311,13 +311,13 @@ No try/catch needed in widget code.
 `SyncEngine.statusStream`. Use it to show a spinner or a "Last synced" label.
 
 ### Cursor persistence
-Sync cursors live in a `_replicore_meta` SQLite table — not in
+Sync cursors live in a `_syncitron_meta` SQLite table — not in
 SharedPreferences. They survive "Clear Cache" and OS-level preference
 eviction because they share the same file as the app data.
 
 ### Soft deletes
 `TodoRepository.softDelete` sets `deleted_at` and `is_synced = 0`.
-On the next sync Replicore calls `remoteAdapter.softDelete`, which updates
+On the next sync syncitron calls `remoteAdapter.softDelete`, which updates
 the Supabase row. Other devices pull the `deleted_at` value and filter it out.
 
 ### Conflict resolution

@@ -2,7 +2,7 @@ import 'package:uuid/uuid.dart';
 
 /// Domain model for a single Todo item.
 ///
-/// The [isSynced] and [deletedAt] fields are managed by Replicore —
+/// The [isSynced] and [deletedAt] fields are managed by syncitron —
 /// your UI code should generally ignore them.
 class Todo {
   final String id;
@@ -11,7 +11,7 @@ class Todo {
   final bool isDone;
   final DateTime updatedAt;
 
-  /// Set by Replicore. 0 = dirty (not yet pushed), 1 = synced.
+  /// Set by syncitron. 0 = dirty (not yet pushed), 1 = synced.
   final int isSynced;
 
   /// Non-null when the record is soft-deleted.
@@ -30,7 +30,7 @@ class Todo {
   bool get isDeleted => deletedAt != null;
 
   /// Creates a brand-new Todo with a client-generated UUID.
-  /// [isSynced] defaults to 0 so Replicore picks it up on the next push.
+  /// [isSynced] defaults to 0 so syncitron picks it up on the next push.
   factory Todo.create({required String userId, required String title}) {
     return Todo(
       id: const Uuid().v4(),

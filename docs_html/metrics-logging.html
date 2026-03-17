@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Metrics & Logging — Replicore Docs</title>
+<title>Metrics & Logging — syncitron Docs</title>
 <link rel="stylesheet" href="assets/style.css">
 <script src="assets/app.js"></script>
 <script src="assets/search.js"></script>
@@ -10,7 +10,7 @@
 <body>
 <div class="topbar">
   <button class="hamburger" onclick="toggleSidebar()">☰</button>
-  <div class="logo">Replicore <span>v0.5.1 Docs</span></div>
+  <div class="logo">syncitron <span>v0.5.1 Docs</span></div>
   <div class="spacer"></div>
   <button class="search-trigger" onclick="openSearch()">🔍 Search <kbd>⌘K</kbd></button>
   <button id="theme-btn" onclick="toggleDark()">🌙 Dark</button>
@@ -67,7 +67,7 @@ for (final tm in metrics.tableMetrics) {
   if (!tm.success) {
     print(&#x27;${tm.tableName} failed: ${tm.errorMessages}&#x27;);
   }
-}</code></pre><h2>MetricsCollector</h2><table><thead><tr><th>Implementation</th><th>Behaviour</th></tr></thead><tbody><tr><td><code>InMemoryMetricsCollector</code></td><td>Stores all sessions and table metrics in memory. Useful for dashboards.</td></tr><tr><td><code>NoOpMetricsCollector</code></td><td>Discards all metrics. Zero overhead for production.</td></tr></tbody></table><h2>Logging</h2><p>Replicore provides a pluggable <code>Logger</code> interface with three built-in implementations.</p><h3>Logger Implementations</h3><table><thead><tr><th>Class</th><th>Behaviour</th></tr></thead><tbody><tr><td><code>ConsoleLogger</code></td><td>Prints to <code>stdout</code>. Accepts <code>minLevel</code> to filter.</td></tr><tr><td><code>NoOpLogger</code></td><td>Discards all log output. Zero overhead.</td></tr><tr><td><code>MultiLogger</code></td><td>Fan-out: delegates to a list of loggers.</td></tr></tbody></table><h3>Log Levels</h3><table><thead><tr><th>Level</th><th>Severity</th></tr></thead><tbody><tr><td><code>LogLevel.debug</code></td><td>0 — Verbose debugging</td></tr><tr><td><code>LogLevel.info</code></td><td>1 — Normal operations</td></tr><tr><td><code>LogLevel.warning</code></td><td>2 — Potential issues</td></tr><tr><td><code>LogLevel.error</code></td><td>3 — Errors requiring attention</td></tr><tr><td><code>LogLevel.critical</code></td><td>4 — Fatal errors</td></tr></tbody></table><h3>Custom Logger Integration</h3><pre><code class="language-dart">class SentryLogger implements Logger {
+}</code></pre><h2>MetricsCollector</h2><table><thead><tr><th>Implementation</th><th>Behaviour</th></tr></thead><tbody><tr><td><code>InMemoryMetricsCollector</code></td><td>Stores all sessions and table metrics in memory. Useful for dashboards.</td></tr><tr><td><code>NoOpMetricsCollector</code></td><td>Discards all metrics. Zero overhead for production.</td></tr></tbody></table><h2>Logging</h2><p>syncitron provides a pluggable <code>Logger</code> interface with three built-in implementations.</p><h3>Logger Implementations</h3><table><thead><tr><th>Class</th><th>Behaviour</th></tr></thead><tbody><tr><td><code>ConsoleLogger</code></td><td>Prints to <code>stdout</code>. Accepts <code>minLevel</code> to filter.</td></tr><tr><td><code>NoOpLogger</code></td><td>Discards all log output. Zero overhead.</td></tr><tr><td><code>MultiLogger</code></td><td>Fan-out: delegates to a list of loggers.</td></tr></tbody></table><h3>Log Levels</h3><table><thead><tr><th>Level</th><th>Severity</th></tr></thead><tbody><tr><td><code>LogLevel.debug</code></td><td>0 — Verbose debugging</td></tr><tr><td><code>LogLevel.info</code></td><td>1 — Normal operations</td></tr><tr><td><code>LogLevel.warning</code></td><td>2 — Potential issues</td></tr><tr><td><code>LogLevel.error</code></td><td>3 — Errors requiring attention</td></tr><tr><td><code>LogLevel.critical</code></td><td>4 — Fatal errors</td></tr></tbody></table><h3>Custom Logger Integration</h3><pre><code class="language-dart">class SentryLogger implements Logger {
   @override
   void error(String msg, {Object? error, StackTrace? stackTrace, Map&lt;String, dynamic&gt;? context}) {
     Sentry.captureException(error, stackTrace: stackTrace);
@@ -86,7 +86,7 @@ final engine = SyncEngine(
   context: {&#x27;table&#x27;: &#x27;todos&#x27;, &#x27;records&#x27;: 42},
 );
 print(entry.toJson());</code></pre><div class="page-nav"><a href="error-handling.html"><div class="label">← Previous</div><div class="title">Error Handling</div></a><a href="backend-supabase.html" class="next"><div class="label">Next →</div><div class="title">Supabase</div></a></div>
-<div class="footer">Replicore v0.5.1 — Enterprise Local-First Sync for Flutter &middot; MIT License</div>
+<div class="footer">syncitron v0.5.1 — Enterprise Local-First Sync for Flutter &middot; MIT License</div>
 </main>
 </div>
 </body></html>

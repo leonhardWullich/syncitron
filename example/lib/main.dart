@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:path/path.dart';
-import 'package:replicore/replicore.dart';
+import 'package:syncitron/syncitron.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -13,6 +13,7 @@ late Database appDb;
 late SyncEngine appEngine;
 late Logger appLogger;
 late MetricsCollector appMetricsCollector;
+RealtimeSubscriptionManager? appRealtimeManager;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,10 +29,10 @@ Future<void> main() async {
 
   // ── 2. Open Local SQLite Database ──────────────────────────────────────────
   appDb = await openDatabase(
-    join(await getDatabasesPath(), 'replicore_example.db'),
+    join(await getDatabasesPath(), 'syncitron_example.db'),
     version: 1,
     onCreate: (db, _) async {
-      // Minimal schema — Replicore adds sync columns automatically via
+      // Minimal schema — syncitron adds sync columns automatically via
       // ensureSyncColumns() during engine.init().
       await db.execute('''
         CREATE TABLE todos (
@@ -44,7 +45,7 @@ Future<void> main() async {
     },
   );
 
-  // ── 3. Initialize Replicore ────────────────────────────────────────────────
+  // ── 3. Initialize syncitron ────────────────────────────────────────────────
 
   // Create local store (handles both data and sync cursors)
   final localStore =
@@ -68,7 +69,7 @@ Future<void> main() async {
   appEngine = SyncEngine(
     localStore: localStore,
     remoteAdapter: remoteAdapter,
-    config: ReplicoreConfig.production(),
+    config: syncitronConfig.production(),
     logger: appLogger,
     metricsCollector: appMetricsCollector,
   )..registerTable(
@@ -92,11 +93,37 @@ Future<void> main() async {
   try {
     await appEngine.init();
   } catch (e) {
-    appLogger.error('Failed to initialize Replicore engine', error: e);
+    appLogger.error('Failed to initialize syncitron engine', error: e);
     // Continue anyway — the app can still function offline
   }
 
-  // ── 4. Setup Background Sync ───────────────────────────────────────────────
+  // ── 4. Setup Real-Time Subscriptions ───────────────────────────────────────
+
+  // Get the realtime provider from the adapter
+  final realtimeProvider = remoteAdapter.getRealtimeProvider();
+
+  if (realtimeProvider != null) {
+    appRealtimeManager = RealtimeSubscriptionManager(
+      config: RealtimeSubscriptionConfig.production(),
+      provider: realtimeProvider,
+      engine: appEngine,
+      logger: appLogger,
+    );
+
+    try {
+      // Subscribe to real-time changes on the 'todos' table
+      await appRealtimeManager!.initialize(['todos']);
+      appLogger.info('Real-time subscriptions active for todos table.');
+    } catch (e) {
+      appLogger.error('Failed to initialize real-time subscriptions', error: e);
+      // Continue without real-time — periodic sync will still work
+    }
+  } else {
+    appLogger
+        .info('No real-time provider available — using periodic sync only.');
+  }
+
+  // ── 5. Setup Background Sync ───────────────────────────────────────────────
   SyncService.instance.start(engine: appEngine);
 
   runApp(TodoApp(
@@ -128,7 +155,7 @@ class TodoApp extends StatelessWidget {
     final currentUser = Supabase.instance.client.auth.currentUser;
 
     return MaterialApp(
-      title: 'Replicore Todo Example',
+      title: 'syncitron Todo Example',
       theme: ThemeData(
         colorSchemeSeed: Colors.indigo,
         useMaterial3: true,

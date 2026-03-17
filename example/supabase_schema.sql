@@ -1,5 +1,5 @@
 -- ============================================================
--- Replicore Todo Example — Supabase Schema
+-- syncitron Todo Example — Supabase Schema
 -- Run this in the Supabase SQL editor before starting the app.
 -- ============================================================
 
@@ -26,7 +26,7 @@ create or replace trigger todos_set_updated_at
   before update on public.todos
   for each row execute function public.set_updated_at();
 
--- 3. Index used by Replicore's keyset cursor query
+-- 3. Index used by syncitron's keyset cursor query
 --    (WHERE updated_at > $1 OR (updated_at = $1 AND id > $2))
 create index if not exists todos_cursor_idx
   on public.todos (updated_at asc, id asc);

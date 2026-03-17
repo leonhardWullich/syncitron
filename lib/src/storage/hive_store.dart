@@ -12,7 +12,7 @@ import 'local_store.dart';
 /// Example setup:
 /// ```dart
 /// await Hive.initFlutter();
-/// final box = await Hive.openBox('replicore_sync');
+/// final box = await Hive.openBox('syncitron_sync');
 ///
 /// final store = HiveStore(
 ///   metadataBox: box,

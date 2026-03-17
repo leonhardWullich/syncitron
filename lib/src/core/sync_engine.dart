@@ -28,7 +28,7 @@ import 'table_config.dart';
 class SyncEngine {
   final LocalStore localStore;
   final RemoteAdapter remoteAdapter;
-  final ReplicoreConfig config;
+  final syncitronConfig config;
   final Logger logger;
   final MetricsCollector metricsCollector;
 
@@ -47,10 +47,10 @@ class SyncEngine {
   SyncEngine({
     required this.localStore,
     required this.remoteAdapter,
-    ReplicoreConfig? config,
+    syncitronConfig? config,
     Logger? logger,
     MetricsCollector? metricsCollector,
-  }) : config = config ?? ReplicoreConfig(),
+  }) : config = config ?? syncitronConfig(),
        logger = logger ?? ConsoleLogger(),
        metricsCollector = metricsCollector ?? InMemoryMetricsCollector() {
     if (this.config.validateOnCreation) {
@@ -66,7 +66,7 @@ class SyncEngine {
   Future<void> _doInit() async {
     _emit('Initializing local database schema...');
     logger.info(
-      'Initializing Replicore SyncEngine',
+      'Initializing syncitron SyncEngine',
       context: {
         'batch_size': config.batchSize,
         'max_retries': config.maxRetries,
@@ -140,7 +140,7 @@ class SyncEngine {
         try {
           final metrics = await _syncTableInternal(table);
           sessionMetrics.addTableMetrics(metrics);
-        } on ReplicoreException catch (e) {
+        } on syncitronException catch (e) {
           logger.error('Sync failed for ${table.name}', error: e);
           _emit('Error syncing ${table.name}.');
         } catch (e, st) {
@@ -175,7 +175,7 @@ class SyncEngine {
 
   /// Syncs a single table by its [TableConfig].
   ///
-  /// Throws [ReplicoreException] subclasses on failure so the caller can
+  /// Throws [syncitronException] subclasses on failure so the caller can
   /// react to the specific error type (network, auth, schema, etc.).
   /// Returns immediately if a sync is already running.
   Future<SyncMetrics> syncTable(TableConfig config) async {
@@ -226,7 +226,7 @@ class SyncEngine {
   /// );
   /// ```
   ///
-  /// Throws [ReplicoreException] subclasses on failure.
+  /// Throws [syncitronException] subclasses on failure.
   /// Returns metrics for the entire sync session.
   Future<SyncSessionMetrics> syncWithOrchestration(
     SyncOrchestrationStrategy strategy,
@@ -516,7 +516,7 @@ class SyncEngine {
     } on SyncAuthException {
       metrics.recordError('Auth error: session may have expired');
       rethrow;
-    } on ReplicoreException catch (e) {
+    } on syncitronException catch (e) {
       // Batch failed, try individual upserts as fallback
       logger.warning(
         'Batch upsert failed, falling back to individual operations',
@@ -581,7 +581,7 @@ class SyncEngine {
     } on SyncAuthException {
       metrics.recordError('Auth error: session may have expired');
       rethrow;
-    } on ReplicoreException catch (e) {
+    } on syncitronException catch (e) {
       // Batch failed, try individual deletes as fallback
       logger.warning(
         'Batch soft delete failed, falling back to individual operations',
@@ -626,7 +626,7 @@ class SyncEngine {
       } on SyncAuthException {
         metrics.recordError('Auth error: session may have expired');
         rethrow;
-      } on ReplicoreException catch (e) {
+      } on syncitronException catch (e) {
         final errorMsg =
             'Push failed for ${config.name} (ID: ${row[config.primaryKey]}): $e';
         metrics.recordError(errorMsg);
@@ -673,7 +673,7 @@ class SyncEngine {
       } on SyncAuthException {
         metrics.recordError('Auth error: session may have expired');
         rethrow;
-      } on ReplicoreException catch (e) {
+      } on syncitronException catch (e) {
         final errorMsg =
             'Push failed for ${config.name} (ID: ${row[config.primaryKey]}): $e';
         metrics.recordError(errorMsg);

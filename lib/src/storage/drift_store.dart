@@ -12,8 +12,8 @@ import 'local_store.dart';
 ///
 /// Example setup:
 /// ```dart
-/// @DataClassName('ReplicoreMeta')
-/// class ReplicoreMetas extends Table {
+/// @DataClassName('syncitronMeta')
+/// class syncitronMetas extends Table {
 ///   TextColumn get key => text()();
 ///   TextColumn get value => text()();
 ///   @override
@@ -21,10 +21,10 @@ import 'local_store.dart';
 /// }
 ///
 /// final store = DriftStore(
-///   queryBuilder: (query) => database.replicoreMetas
+///   queryBuilder: (query) => database.syncitronMetas
 ///     .byKey(query)
 ///     .getSingleOrNull(),
-///   upsertBuilder: (table, records) => database.into(database.replicoreMetas)
+///   upsertBuilder: (table, records) => database.into(database.syncitronMetas)
 ///     .insertAll(records),
 /// );
 /// ```

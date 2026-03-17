@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>GraphQL Backend — Replicore Docs</title>
+<title>GraphQL Backend — syncitron Docs</title>
 <link rel="stylesheet" href="assets/style.css">
 <script src="assets/app.js"></script>
 <script src="assets/search.js"></script>
@@ -10,7 +10,7 @@
 <body>
 <div class="topbar">
   <button class="hamburger" onclick="toggleSidebar()">☰</button>
-  <div class="logo">Replicore <span>v0.5.1 Docs</span></div>
+  <div class="logo">syncitron <span>v0.5.1 Docs</span></div>
   <div class="spacer"></div>
   <button class="search-trigger" onclick="openSearch()">🔍 Search <kbd>⌘K</kbd></button>
   <button id="theme-btn" onclick="toggleDark()">🌙 Dark</button>
@@ -58,10 +58,10 @@
 </nav>
 <main class="content">
 <h1>GraphQL Backend</h1>
-<p style="opacity:.75;font-size:.9rem;margin-top:-.5rem">Works with Hasura, Apollo, or any GraphQL server</p><p><code>GraphQLAdapter</code> works with any GraphQL server (Hasura, Apollo, Supabase GraphQL, custom). You provide query/mutation builders; Replicore handles the sync logic.</p><h2>Setup</h2><pre><code class="language-yaml">dependencies:
-  replicore: ^0.5.1
+<p style="opacity:.75;font-size:.9rem;margin-top:-.5rem">Works with Hasura, Apollo, or any GraphQL server</p><p><code>GraphQLAdapter</code> works with any GraphQL server (Hasura, Apollo, Supabase GraphQL, custom). You provide query/mutation builders; syncitron handles the sync logic.</p><h2>Setup</h2><pre><code class="language-yaml">dependencies:
+  syncitron: ^0.5.1
   graphql: ^5.1.0</code></pre><pre><code class="language-dart">import &#x27;package:graphql/client.dart&#x27;;
-import &#x27;package:replicore/replicore.dart&#x27;;
+import &#x27;package:syncitron/syncitron.dart&#x27;;
 
 final graphqlClient = GraphQLClient(
   link: HttpLink(&#x27;https://your-server.com/graphql&#x27;),
@@ -104,7 +104,7 @@ final adapter = GraphQLAdapter(
     &#x27;&#x27;&#x27;;
   },
 );</code></pre><div class="page-nav"><a href="backend-appwrite.html"><div class="label">← Previous</div><div class="title">Appwrite</div></a><a href="storage-sqflite.html" class="next"><div class="label">Next →</div><div class="title">SQLite (sqflite)</div></a></div>
-<div class="footer">Replicore v0.5.1 — Enterprise Local-First Sync for Flutter &middot; MIT License</div>
+<div class="footer">syncitron v0.5.1 — Enterprise Local-First Sync for Flutter &middot; MIT License</div>
 </main>
 </div>
 </body></html>

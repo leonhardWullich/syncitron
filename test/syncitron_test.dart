@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:replicore/replicore.dart';
+import 'package:syncitron/syncitron.dart';
 
 class InMemoryLocalStore implements LocalStore {
   final Map<String, List<Map<String, dynamic>>> tables = {};
@@ -316,7 +316,7 @@ void main() {
       final local = InMemoryLocalStore();
       final remote = FakeRemoteAdapter();
       remote.remoteTables['notes'] = [];
-      final config = ReplicoreConfig(batchSize: 2);
+      final config = syncitronConfig(batchSize: 2);
       final engine = SyncEngine(
         localStore: local,
         remoteAdapter: remote,
@@ -340,7 +340,7 @@ void main() {
         final engine = SyncEngine(
           localStore: local,
           remoteAdapter: remote,
-          config: ReplicoreConfig(batchSize: 2),
+          config: syncitronConfig(batchSize: 2),
         )..registerTable(notesTable());
         await engine.syncTable(notesTable());
         final uuids = local.table('notes').map((e) => e['uuid']).toList();

@@ -30,3 +30,9 @@ migrate_working_dir/
 /build/
 *.nosync/
 /coverage/
+
+# Keep tracked files visible to pub publish checks
+!docs_html/INDEX.html
+!lib/replicore.dart
+!replicore_logo.jpeg
+!test/replicore_test.dart

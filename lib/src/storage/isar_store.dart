@@ -12,7 +12,7 @@ import 'local_store.dart';
 /// Example setup:
 /// ```dart
 /// final isar = await Isar.open([
-///   ReplicoreMetaSchema,
+///   syncitronMetaSchema,
 ///   YourTableSchema,
 /// ]);
 ///
@@ -80,7 +80,7 @@ class IsarStore implements LocalStore {
   Future<SyncCursor?> readCursor(String table) async {
     try {
       // Cursors stored in special Isar collection
-      final metaCollection = _getCollection('_replicore_meta');
+      final metaCollection = _getCollection('_syncitron_meta');
 
       // Isar query syntax: metaCollection.where().key(cursor_$table).findFirst()
       final result = await (metaCollection as dynamic)
@@ -104,12 +104,12 @@ class IsarStore implements LocalStore {
   @override
   Future<void> writeCursor(String table, SyncCursor cursor) async {
     try {
-      final metaCollection = _getCollection('_replicore_meta');
+      final metaCollection = _getCollection('_syncitron_meta');
 
       await isar.writeTxn(() async {
         await (metaCollection as dynamic).clear();
         await (metaCollection as dynamic).put(
-          // Assuming a ReplicoreMeta object with key and value fields
+          // Assuming a syncitronMeta object with key and value fields
           {'key': 'cursor_$table', 'value': jsonEncode(cursor.toJson())},
         );
       });
@@ -125,7 +125,7 @@ class IsarStore implements LocalStore {
   @override
   Future<void> clearCursor(String table) async {
     try {
-      final metaCollection = _getCollection('_replicore_meta');
+      final metaCollection = _getCollection('_syncitron_meta');
 
       await isar.writeTxn(() async {
         await (metaCollection as dynamic)

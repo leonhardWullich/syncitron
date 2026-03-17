@@ -1,6 +1,6 @@
-# Contributing to Replicore
+# Contributing to syncitron
 
-Thank you for your interest in contributing to Replicore! We welcome contributions from everyone. This document provides guidelines and instructions for contributing.
+Thank you for your interest in contributing to syncitron! We welcome contributions from everyone. This document provides guidelines and instructions for contributing.
 
 ## Code of Conduct
 
@@ -57,10 +57,10 @@ We actively welcome pull requests!
 
 ```bash
 # Clone your fork
-git clone https://github.com/YOUR_USERNAME/replicore.git
+git clone https://github.com/YOUR_USERNAME/syncitron.git
 
 # Navigate to the directory
-cd replicore
+cd syncitron
 
 # Get dependencies
 flutter pub get
@@ -115,7 +115,7 @@ All public APIs must be documented:
 /// - Duration of the sync
 /// - Any errors that occurred
 ///
-/// Throws [ReplicoreException] on fatal errors.
+/// Throws [syncitronException] on fatal errors.
 /// Individual table errors are logged but don't prevent other tables from syncing.
 ///
 /// Example:
@@ -156,7 +156,7 @@ All new features must include tests. We use `flutter_test`:
 
 ```dart
 import 'package:flutter_test/flutter_test.dart';
-import 'package:replicore/replicore.dart';
+import 'package:syncitron/syncitron.dart';
 
 void main() {
   group('SyncEngine', () {
@@ -164,7 +164,7 @@ void main() {
       final engine = SyncEngine(
         localStore: MockLocalStore(),
         remoteAdapter: MockRemoteAdapter(),
-        config: ReplicoreConfig.testing(),
+        config: syncitronConfig.testing(),
       );
 
       await engine.init();
@@ -237,7 +237,7 @@ Update CHANGELOG.md for all changes:
 
 ### Design Principles
 
-Replicore follows these principles:
+syncitron follows these principles:
 
 1. **Simplicity**: Simple APIs for common use cases
 2. **Flexibility**: Pluggable architecture for advanced use cases
@@ -256,7 +256,7 @@ Replicore follows these principles:
 
 ```
 lib/
-  replicore.dart (root export)
+  syncitron.dart (root export)
   src/
     core/ (sync logic, models, exceptions, configuration)
     adapters/ (RemoteAdapter implementations)
@@ -307,13 +307,13 @@ Only maintainers can create releases. The process is:
 
 - **Documentation**: Check [ENTERPRISE_README.md](ENTERPRISE_README.md)
 - **Examples**: See [example/](example/) directory
-- **Issues**: Search [GitHub issues](https://github.com/leonhardWullich/replicore/issues)
-- **Discussions**: Ask in [GitHub discussions](https://github.com/leonhardWullich/replicore/discussions)
+- **Issues**: Search [GitHub issues](https://github.com/leonhardWullich/syncitron/issues)
+- **Discussions**: Ask in [GitHub discussions](https://github.com/leonhardWullich/syncitron/discussions)
 
 ## Legal
 
-By contributing to Replicore, you agree that your contributions will be licensed under its MIT License.
+By contributing to syncitron, you agree that your contributions will be licensed under its MIT License.
 
 ---
 
-Thank you for contributing to Replicore! 🎉
+Thank you for contributing to syncitron! 🎉

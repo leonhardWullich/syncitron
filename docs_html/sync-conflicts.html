@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Conflict Resolution — Replicore Docs</title>
+<title>Conflict Resolution — syncitron Docs</title>
 <link rel="stylesheet" href="assets/style.css">
 <script src="assets/app.js"></script>
 <script src="assets/search.js"></script>
@@ -10,7 +10,7 @@
 <body>
 <div class="topbar">
   <button class="hamburger" onclick="toggleSidebar()">☰</button>
-  <div class="logo">Replicore <span>v0.5.1 Docs</span></div>
+  <div class="logo">syncitron <span>v0.5.1 Docs</span></div>
   <div class="spacer"></div>
   <button class="search-trigger" onclick="openSearch()">🔍 Search <kbd>⌘K</kbd></button>
   <button id="theme-btn" onclick="toggleDark()">🌙 Dark</button>
@@ -58,7 +58,7 @@
 </nav>
 <main class="content">
 <h1>Conflict Resolution</h1>
-<p style="opacity:.75;font-size:.9rem;margin-top:-.5rem">ServerWins · LocalWins · LastWriteWins · Custom</p><p>A conflict occurs when a record was modified both locally and remotely since the last sync. Replicore supports four strategies, configured per table.</p><h2>SyncStrategy Enum</h2><table><thead><tr><th>Strategy</th><th>Behaviour</th><th>Use Case</th></tr></thead><tbody><tr><td><code>serverWins</code></td><td>Remote record overwrites local. <strong>Default.</strong></td><td>Reference data, admin settings</td></tr><tr><td><code>localWins</code></td><td>Local record is kept; remote update ignored.</td><td>Drafts, user preferences</td></tr><tr><td><code>lastWriteWins</code></td><td>Record with the latest <code>updated_at</code> wins.</td><td>Collaborative content</td></tr><tr><td><code>custom</code></td><td>Your custom resolver function runs.</td><td>Complex merge logic</td></tr></tbody></table><h2>Setting the Strategy</h2><pre><code class="language-dart">// Per table
+<p style="opacity:.75;font-size:.9rem;margin-top:-.5rem">ServerWins · LocalWins · LastWriteWins · Custom</p><p>A conflict occurs when a record was modified both locally and remotely since the last sync. syncitron supports four strategies, configured per table.</p><h2>SyncStrategy Enum</h2><table><thead><tr><th>Strategy</th><th>Behaviour</th><th>Use Case</th></tr></thead><tbody><tr><td><code>serverWins</code></td><td>Remote record overwrites local. <strong>Default.</strong></td><td>Reference data, admin settings</td></tr><tr><td><code>localWins</code></td><td>Local record is kept; remote update ignored.</td><td>Drafts, user preferences</td></tr><tr><td><code>lastWriteWins</code></td><td>Record with the latest <code>updated_at</code> wins.</td><td>Collaborative content</td></tr><tr><td><code>custom</code></td><td>Your custom resolver function runs.</td><td>Complex merge logic</td></tr></tbody></table><h2>Setting the Strategy</h2><pre><code class="language-dart">// Per table
 engine.registerTable(TableConfig(
   name: &#x27;settings&#x27;,
   columns: [&#x27;id&#x27;, &#x27;key&#x27;, &#x27;value&#x27;, &#x27;updated_at&#x27;, &#x27;deleted_at&#x27;],
@@ -75,7 +75,7 @@ engine.registerTable(TableConfig(
     return UseRemote(remote);
   },
 ));</code></pre><h3>ConflictResolution Types</h3><table><thead><tr><th>Type</th><th>Meaning</th></tr></thead><tbody><tr><td><code>UseLocal()</code></td><td>Keep the local dirty record as-is.</td></tr><tr><td><code>UseRemote(data)</code></td><td>Overwrite local with the remote record data.</td></tr><tr><td><code>UseMerged(data)</code></td><td>Save a manually merged map combining both versions.</td></tr></tbody></table><div class="callout callout-danger"><span class="icon">🚫</span><div>Using <code>SyncStrategy.custom</code> without providing a <code>customResolver</code> will throw an <code>EngineConfigurationException</code> at registration time.</div></div><h2>How Conflicts Are Detected</h2><p>During the <strong>pull</strong> phase, for each incoming remote record, the engine checks if a local record with the same primary key exists and has <code>is_synced = 0</code> (dirty). If so, it's a conflict. If the local record is already synced, the remote version is simply upserted.</p><div class="page-nav"><a href="sync-engine.html"><div class="label">← Previous</div><div class="title">Sync Engine</div></a><a href="configuration.html" class="next"><div class="label">Next →</div><div class="title">Configuration</div></a></div>
-<div class="footer">Replicore v0.5.1 — Enterprise Local-First Sync for Flutter &middot; MIT License</div>
+<div class="footer">syncitron v0.5.1 — Enterprise Local-First Sync for Flutter &middot; MIT License</div>
 </main>
 </div>
 </body></html>

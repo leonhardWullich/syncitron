@@ -2,7 +2,9 @@ import 'dart:async';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
-import 'package:replicore/replicore.dart';
+import 'package:syncitron/syncitron.dart';
+
+import '../main.dart'; // for appRealtimeManager access
 
 /// Wraps [SyncEngine] with:
 ///   - an initial sync on startup
@@ -45,7 +47,7 @@ class SyncService {
 
   /// Non-null when the last sync ended with an error.
   /// Cleared automatically at the start of each new sync run.
-  final syncError = ValueNotifier<ReplicoreException?>(null);
+  final syncError = ValueNotifier<syncitronException?>(null);
 
   /// Current connectivity state — UI can show an offline banner.
   final isOnline = ValueNotifier<bool>(true);
@@ -83,6 +85,11 @@ class SyncService {
     _connectivitySub?.cancel();
     _periodicTimer?.cancel();
     _engine.dispose();
+
+    // Close real-time subscriptions if active
+    if (appRealtimeManager != null) {
+      appRealtimeManager!.close();
+    }
   }
 
   // ── Connectivity handling ──────────────────────────────────────────────────
@@ -160,7 +167,7 @@ class SyncService {
       syncError.value = e;
       debugPrint('[SyncService] ‼️ Schema error on table "${e.table}": $e');
       if (kDebugMode) rethrow;
-    } on ReplicoreException catch (e) {
+    } on syncitronException catch (e) {
       syncError.value = e;
       debugPrint('[SyncService] Sync error: $e');
     } finally {

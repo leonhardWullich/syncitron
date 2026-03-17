@@ -8,7 +8,7 @@ import 'supabase_realtime.dart';
 /// [RemoteAdapter] implementation backed by Supabase.
 ///
 /// **Cursor storage**: Cursors are read from and written to [localStore]
-/// (a dedicated `_replicore_meta` SQLite table) instead of SharedPreferences.
+/// (a dedicated `_syncitron_meta` SQLite table) instead of SharedPreferences.
 /// This ensures cursors survive "Clear Cache" actions and OS-level preference
 /// eviction, because the cursor lives in the same file as the data it tracks.
 ///
@@ -26,7 +26,7 @@ import 'supabase_realtime.dart';
 class SupabaseAdapter implements RemoteAdapter {
   /// Supabase client instance. Accepts `dynamic` so that
   /// `package:supabase_flutter` does not need to be a direct dependency
-  /// of Replicore.
+  /// of syncitron.
   final dynamic client;
 
   final String updatedAtColumn;

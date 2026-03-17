@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Quick Start — Replicore Docs</title>
+<title>Quick Start — syncitron Docs</title>
 <link rel="stylesheet" href="assets/style.css">
 <script src="assets/app.js"></script>
 <script src="assets/search.js"></script>
@@ -10,7 +10,7 @@
 <body>
 <div class="topbar">
   <button class="hamburger" onclick="toggleSidebar()">☰</button>
-  <div class="logo">Replicore <span>v0.5.1 Docs</span></div>
+  <div class="logo">syncitron <span>v0.5.1 Docs</span></div>
   <div class="spacer"></div>
   <button class="search-trigger" onclick="openSearch()">🔍 Search <kbd>⌘K</kbd></button>
   <button id="theme-btn" onclick="toggleDark()">🌙 Dark</button>
@@ -58,10 +58,10 @@
 </nav>
 <main class="content">
 <h1>Quick Start</h1>
-<p style="opacity:.75;font-size:.9rem;margin-top:-.5rem">Your first offline-first sync in 5 minutes</p><p>Get your first offline-first sync running in under 5 minutes.</p><div class="toc"><h4>On this page</h4><ul><li><a href="#install">1. Installation</a></li><li><a href="#setup-db">2. Set Up Local Database</a></li><li><a href="#create-engine">3. Create Sync Engine</a></li><li><a href="#register">4. Register Tables</a></li><li><a href="#sync">5. Sync</a></li><li><a href="#whats-next">What's Next</a></li></ul></div><h2 id="install">1. Installation</h2><pre><code class="language-bash">flutter pub add replicore</code></pre><p>Or add manually to <code>pubspec.yaml</code>:</p><pre><code class="language-yaml">dependencies:
-  replicore: ^0.5.1
+<p style="opacity:.75;font-size:.9rem;margin-top:-.5rem">Your first offline-first sync in 5 minutes</p><p>Get your first offline-first sync running in under 5 minutes.</p><div class="toc"><h4>On this page</h4><ul><li><a href="#install">1. Installation</a></li><li><a href="#setup-db">2. Set Up Local Database</a></li><li><a href="#create-engine">3. Create Sync Engine</a></li><li><a href="#register">4. Register Tables</a></li><li><a href="#sync">5. Sync</a></li><li><a href="#whats-next">What's Next</a></li></ul></div><h2 id="install">1. Installation</h2><pre><code class="language-bash">flutter pub add syncitron</code></pre><p>Or add manually to <code>pubspec.yaml</code>:</p><pre><code class="language-yaml">dependencies:
+  syncitron: ^0.5.1
   sqflite: ^2.4.2            # local store (user dependency)
-  supabase_flutter: ^2.12.0  # remote backend (user dependency)</code></pre><div class="callout callout-info"><span class="icon">ℹ️</span><div>Replicore has <strong>zero third-party dependencies</strong>. All backend packages (Supabase, Firebase, Appwrite, GraphQL) and local stores (sqflite, Drift, Hive, Isar) are optional — add only the ones you actually use to your own <code>pubspec.yaml</code>.</div></div><h2 id="setup-db">2. Set Up Local Database</h2><pre><code class="language-dart">import &#x27;package:sqflite/sqflite.dart&#x27;;
+  supabase_flutter: ^2.12.0  # remote backend (user dependency)</code></pre><div class="callout callout-info"><span class="icon">ℹ️</span><div>syncitron has <strong>zero third-party dependencies</strong>. All backend packages (Supabase, Firebase, Appwrite, GraphQL) and local stores (sqflite, Drift, Hive, Isar) are optional — add only the ones you actually use to your own <code>pubspec.yaml</code>.</div></div><h2 id="setup-db">2. Set Up Local Database</h2><pre><code class="language-dart">import &#x27;package:sqflite/sqflite.dart&#x27;;
 import &#x27;package:path/path.dart&#x27;;
 
 final db = await openDatabase(
@@ -78,7 +78,7 @@ final db = await openDatabase(
       &#x27;)&#x27;
     );
   },
-);</code></pre><div class="callout callout-info"><span class="icon">ℹ️</span><div>Replicore automatically adds <code>is_synced</code> and <code>op_id</code> columns via <code>ensureSyncColumns()</code> during <code>engine.init()</code>. You do not need to create them manually.</div></div><h2 id="create-engine">3. Create the Sync Engine</h2><pre><code class="language-dart">import &#x27;package:replicore/replicore.dart&#x27;;
+);</code></pre><div class="callout callout-info"><span class="icon">ℹ️</span><div>syncitron automatically adds <code>is_synced</code> and <code>op_id</code> columns via <code>ensureSyncColumns()</code> during <code>engine.init()</code>. You do not need to create them manually.</div></div><h2 id="create-engine">3. Create the Sync Engine</h2><pre><code class="language-dart">import &#x27;package:syncitron/syncitron.dart&#x27;;
 import &#x27;package:sqflite/sqflite.dart&#x27;;
 import &#x27;package:supabase_flutter/supabase_flutter.dart&#x27;;
 
@@ -94,7 +94,7 @@ final remoteAdapter = SupabaseAdapter(
 final engine = SyncEngine(
   localStore:       localStore,
   remoteAdapter:    remoteAdapter,
-  config:           ReplicoreConfig.production(),
+  config:           syncitronConfig.production(),
   logger:           ConsoleLogger(minLevel: LogLevel.info),
   metricsCollector: InMemoryMetricsCollector(),
 );</code></pre><h2 id="register">4. Register Tables</h2><pre><code class="language-dart">engine
@@ -113,7 +113,7 @@ final metrics = await engine.syncAll(); // pull + push all registered tables
 print(&#x27;Success: ${metrics.overallSuccess}&#x27;);
 print(&#x27;Pulled:  ${metrics.totalRecordsPulled}&#x27;);
 print(&#x27;Pushed:  ${metrics.totalRecordsPushed}&#x27;);</code></pre><h2 id="whats-next">What's Next</h2><ul><li><a href="architecture.html">Architecture Overview</a> — understand the data flow</li><li><a href="sync-conflicts.html">Conflict Resolution</a> — pick the right strategy</li><li><a href="configuration.html">Configuration</a> — tune batch size, retries, timeouts</li><li><a href="widgets.html">UI Widgets</a> — drop-in sync status &amp; error widgets</li></ul><div class="page-nav"><a href="index.html"><div class="label">← Previous</div><div class="title">Home</div></a><a href="architecture.html" class="next"><div class="label">Next →</div><div class="title">Architecture</div></a></div>
-<div class="footer">Replicore v0.5.1 — Enterprise Local-First Sync for Flutter &middot; MIT License</div>
+<div class="footer">syncitron v0.5.1 — Enterprise Local-First Sync for Flutter &middot; MIT License</div>
 </main>
 </div>
 </body></html>

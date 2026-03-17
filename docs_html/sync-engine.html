@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Sync Engine — Replicore Docs</title>
+<title>Sync Engine — syncitron Docs</title>
 <link rel="stylesheet" href="assets/style.css">
 <script src="assets/app.js"></script>
 <script src="assets/search.js"></script>
@@ -10,7 +10,7 @@
 <body>
 <div class="topbar">
   <button class="hamburger" onclick="toggleSidebar()">☰</button>
-  <div class="logo">Replicore <span>v0.5.1 Docs</span></div>
+  <div class="logo">syncitron <span>v0.5.1 Docs</span></div>
   <div class="spacer"></div>
   <button class="search-trigger" onclick="openSearch()">🔍 Search <kbd>⌘K</kbd></button>
   <button id="theme-btn" onclick="toggleDark()">🌙 Dark</button>
@@ -58,10 +58,10 @@
 </nav>
 <main class="content">
 <h1>Sync Engine</h1>
-<p style="opacity:.75;font-size:.9rem;margin-top:-.5rem">Core orchestrator for all sync operations</p><p>The <code>SyncEngine</code> is the central class of Replicore. It orchestrates pulling, pushing, conflict resolution, metrics, and status updates.</p><h2>Constructor</h2><pre><code class="language-dart">SyncEngine({
+<p style="opacity:.75;font-size:.9rem;margin-top:-.5rem">Core orchestrator for all sync operations</p><p>The <code>SyncEngine</code> is the central class of syncitron. It orchestrates pulling, pushing, conflict resolution, metrics, and status updates.</p><h2>Constructor</h2><pre><code class="language-dart">SyncEngine({
   required LocalStore localStore,
   required RemoteAdapter remoteAdapter,
-  ReplicoreConfig? config,            // default: ReplicoreConfig()
+  syncitronConfig? config,            // default: syncitronConfig()
   Logger? logger,                     // default: ConsoleLogger()
   MetricsCollector? metricsCollector,  // default: InMemoryMetricsCollector()
 })</code></pre><h2>Public API</h2><table><thead><tr><th>Method</th><th>Returns</th><th>Description</th></tr></thead><tbody><tr><td><code>init()</code></td><td><code>Future&lt;void&gt;</code></td><td>Ensures sync columns exist. Idempotent — safe to call repeatedly.</td></tr><tr><td><code>registerTable(TableConfig)</code></td><td><code>SyncEngine</code></td><td>Registers a table. Returns <code>this</code> for chaining. Must be called before <code>init()</code>.</td></tr><tr><td><code>syncAll()</code></td><td><code>Future&lt;SyncSessionMetrics&gt;</code></td><td>Pull + push all registered tables. Skips if sync is already running.</td></tr><tr><td><code>syncTable(TableConfig)</code></td><td><code>Future&lt;SyncMetrics&gt;</code></td><td>Sync a single table by config. Skips if sync is already running.</td></tr><tr><td><code>syncTableByName(String)</code></td><td><code>Future&lt;SyncMetrics&gt;</code></td><td>Sync a single table by name. Looks up the registered TableConfig.</td></tr><tr><td><code>syncWithOrchestration(strategy)</code></td><td><code>Future&lt;SyncSessionMetrics&gt;</code></td><td>Execute a custom <a href='orchestration.html'>SyncOrchestrationStrategy</a>.</td></tr><tr><td><code>dispose()</code></td><td><code>void</code></td><td>Closes the status stream controller. Call on app shutdown.</td></tr></tbody></table><h3>statusStream</h3><p>A broadcast <code>Stream&lt;String&gt;</code> emitting human-readable status messages during sync. Wire it to <a href="widgets.html">SyncStatusWidget</a> or listen directly:</p><pre><code class="language-dart">engine.statusStream.listen((msg) =&gt; print(&#x27;Sync: $msg&#x27;));
@@ -74,7 +74,7 @@ if (!metrics.overallSuccess) {
     if (!tm.success) print(&#x27;Failed: ${tm.tableName} — ${tm.errorMessages}&#x27;);
   }
 }</code></pre><div class="page-nav"><a href="architecture.html"><div class="label">← Previous</div><div class="title">Architecture</div></a><a href="sync-conflicts.html" class="next"><div class="label">Next →</div><div class="title">Conflict Resolution</div></a></div>
-<div class="footer">Replicore v0.5.1 — Enterprise Local-First Sync for Flutter &middot; MIT License</div>
+<div class="footer">syncitron v0.5.1 — Enterprise Local-First Sync for Flutter &middot; MIT License</div>
 </main>
 </div>
 </body></html>

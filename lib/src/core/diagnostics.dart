@@ -94,7 +94,7 @@ abstract class DiagnosticsProvider {
 /// ```
 class DatabaseDiagnosticsProvider implements DiagnosticsProvider {
   /// The sqflite [Database] instance. Accepts `dynamic` so that
-  /// `package:sqflite` does not need to be a direct dependency of Replicore.
+  /// `package:sqflite` does not need to be a direct dependency of syncitron.
   final dynamic database;
 
   DatabaseDiagnosticsProvider(this.database);

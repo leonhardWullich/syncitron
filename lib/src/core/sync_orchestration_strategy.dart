@@ -1,4 +1,4 @@
-import 'package:replicore/replicore.dart';
+import 'package:syncitron/syncitron.dart';
 
 import 'logger.dart';
 import 'metrics.dart';
@@ -30,7 +30,7 @@ abstract class SyncOrchestrationStrategy {
   /// The [context] provides utilities for controlled table syncing with
   /// automatic metrics collection and error handling.
   ///
-  /// Throws [ReplicoreException] on sync errors.
+  /// Throws [syncitronException] on sync errors.
   /// Returns aggregated [SyncSessionMetrics].
   Future<SyncSessionMetrics> execute(SyncOrchestrationContext context);
 
@@ -67,13 +67,13 @@ abstract class SyncOrchestrationContext {
   /// Sync the specified table with automatic error handling and metrics collection.
   ///
   /// Returns metrics for this table only.
-  /// Throws [ReplicoreException] on sync errors.
+  /// Throws [syncitronException] on sync errors.
   Future<SyncMetrics> managedSyncTable(String tableName);
 
   /// Sync all registered tables with automatic error handling and metrics collection.
   ///
   /// Returns aggregated metrics for all tables.
-  /// Throws [ReplicoreException] on sync errors.
+  /// Throws [syncitronException] on sync errors.
   Future<SyncSessionMetrics> managedSyncAll();
 
   /// Check if sync should continue based on cancellation token or timeout.
@@ -87,7 +87,7 @@ abstract class SyncOrchestrationContext {
 
 /// Built-in orchestration: Standard pull-push-conflicts pattern (default).
 ///
-/// Syncs all tables in sequence using the standard Replicore flow:
+/// Syncs all tables in sequence using the standard syncitron flow:
 /// 1. Pull remote changes
 /// 2. Push local changes
 /// 3. Resolve conflicts
@@ -191,7 +191,7 @@ class PrioritySyncOrchestration extends SyncOrchestrationStrategy {
       try {
         final metrics = await context.managedSyncTable(tableName);
         metricsPerTable.add(metrics);
-      } on ReplicoreException catch (e) {
+      } on syncitronException catch (e) {
         if (priority >= criticalPriority) {
           // Critical table error → fail fast
           context.logger.error('Critical table sync failed', error: e);

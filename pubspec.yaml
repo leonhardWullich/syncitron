@@ -1,8 +1,8 @@
-name: replicore
+name: syncitron
 description: |
   Enterprise-grade local-first synchronization framework for Flutter.
   
-  Replicore is a production-ready, pluggable sync engine that seamlessly bridges
+  syncitron is a production-ready, pluggable sync engine that seamlessly bridges
   local SQLite databases with remote backends (Supabase, REST APIs, etc.).
   It handles offline-first data synchronization, conflict resolution, 
   incremental syncing, and comprehensive error recovery out of the box.
@@ -11,10 +11,10 @@ description: |
   automatic sync, conflict resolution strategies, and advanced monitoring.
 
 version: 0.5.1
-homepage: https://github.com/leonhardWullich/replicore
-repository: https://github.com/leonhardWullich/replicore
-documentation: https://github.com/leonhardWullich/replicore/docs
-issue_tracker: https://github.com/leonhardWullich/replicore/issues
+homepage: https://github.com/leonhardWullich/syncitron
+repository: https://github.com/leonhardWullich/syncitron
+documentation: https://github.com/leonhardWullich/syncitron/docs
+issue_tracker: https://github.com/leonhardWullich/syncitron/issues
 
 environment:
   sdk: ^3.10.8

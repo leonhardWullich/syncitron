@@ -1,4 +1,4 @@
-/// Metrics for monitoring Replicore's sync performance.
+/// Metrics for monitoring syncitron's sync performance.
 class SyncMetrics {
   final String tableName;
   final DateTime startTime;

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>UI Widgets — Replicore Docs</title>
+<title>UI Widgets — syncitron Docs</title>
 <link rel="stylesheet" href="assets/style.css">
 <script src="assets/app.js"></script>
 <script src="assets/search.js"></script>
@@ -10,7 +10,7 @@
 <body>
 <div class="topbar">
   <button class="hamburger" onclick="toggleSidebar()">☰</button>
-  <div class="logo">Replicore <span>v0.5.1 Docs</span></div>
+  <div class="logo">syncitron <span>v0.5.1 Docs</span></div>
   <div class="spacer"></div>
   <button class="search-trigger" onclick="openSearch()">🔍 Search <kbd>⌘K</kbd></button>
   <button id="theme-btn" onclick="toggleDark()">🌙 Dark</button>
@@ -58,7 +58,7 @@
 </nav>
 <main class="content">
 <h1>UI Widgets</h1>
-<p style="opacity:.75;font-size:.9rem;margin-top:-.5rem">6 ready-made Flutter widgets for sync UX</p><p>Replicore ships 6 ready-made Flutter widgets for displaying sync status, errors, and metrics.</p><h2>SyncStatusWidget</h2><p>Displays sync status from the engine's <code>statusStream</code>.</p><pre><code class="language-dart">SyncStatusWidget(
+<p style="opacity:.75;font-size:.9rem;margin-top:-.5rem">6 ready-made Flutter widgets for sync UX</p><p>syncitron ships 6 ready-made Flutter widgets for displaying sync status, errors, and metrics.</p><h2>SyncStatusWidget</h2><p>Displays sync status from the engine's <code>statusStream</code>.</p><pre><code class="language-dart">SyncStatusWidget(
   statusStream: engine.statusStream,
   onSync: () =&gt; engine.syncAll(),
   showProgress: true,
@@ -67,12 +67,12 @@
   metrics: sessionMetrics,
   elevation: 2,
   backgroundColor: Colors.white,
-)</code></pre><table><thead><tr><th>Prop</th><th>Type</th><th>Default</th></tr></thead><tbody><tr><td><code>metrics</code></td><td><code>SyncSessionMetrics</code></td><td>required</td></tr><tr><td><code>elevation</code></td><td><code>double</code></td><td>1</td></tr><tr><td><code>backgroundColor</code></td><td><code>Color?</code></td><td>null</td></tr><tr><td><code>showWhenEmpty</code></td><td><code>bool</code></td><td>true</td></tr></tbody></table><h2>SyncErrorBanner</h2><p>Context-aware error banner using Dart 3 pattern matching on the sealed <code>ReplicoreException</code> hierarchy.</p><pre><code class="language-dart">SyncErrorBanner(
-  error: currentError,   // ReplicoreException?
+)</code></pre><table><thead><tr><th>Prop</th><th>Type</th><th>Default</th></tr></thead><tbody><tr><td><code>metrics</code></td><td><code>SyncSessionMetrics</code></td><td>required</td></tr><tr><td><code>elevation</code></td><td><code>double</code></td><td>1</td></tr><tr><td><code>backgroundColor</code></td><td><code>Color?</code></td><td>null</td></tr><tr><td><code>showWhenEmpty</code></td><td><code>bool</code></td><td>true</td></tr></tbody></table><h2>SyncErrorBanner</h2><p>Context-aware error banner using Dart 3 pattern matching on the sealed <code>syncitronException</code> hierarchy.</p><pre><code class="language-dart">SyncErrorBanner(
+  error: currentError,   // syncitronException?
   onRetry: () =&gt; engine.syncAll(),
   onDismiss: () =&gt; setState(() =&gt; currentError = null),
   customMessage: null,   // optional override text
-)</code></pre><table><thead><tr><th>Prop</th><th>Type</th><th>Default</th></tr></thead><tbody><tr><td><code>error</code></td><td><code>ReplicoreException?</code></td><td>required</td></tr><tr><td><code>onRetry</code></td><td><code>VoidCallback?</code></td><td>null</td></tr><tr><td><code>onDismiss</code></td><td><code>VoidCallback?</code></td><td>null</td></tr><tr><td><code>customMessage</code></td><td><code>String?</code></td><td>null</td></tr></tbody></table><p>When <code>error</code> is <code>null</code>, the banner is hidden (renders <code>SizedBox.shrink()</code>).</p><h2>OfflineIndicator</h2><p>Small chip showing online/offline state.</p><pre><code class="language-dart">OfflineIndicator(
+)</code></pre><table><thead><tr><th>Prop</th><th>Type</th><th>Default</th></tr></thead><tbody><tr><td><code>error</code></td><td><code>syncitronException?</code></td><td>required</td></tr><tr><td><code>onRetry</code></td><td><code>VoidCallback?</code></td><td>null</td></tr><tr><td><code>onDismiss</code></td><td><code>VoidCallback?</code></td><td>null</td></tr><tr><td><code>customMessage</code></td><td><code>String?</code></td><td>null</td></tr></tbody></table><p>When <code>error</code> is <code>null</code>, the banner is hidden (renders <code>SizedBox.shrink()</code>).</p><h2>OfflineIndicator</h2><p>Small chip showing online/offline state.</p><pre><code class="language-dart">OfflineIndicator(
   isOnline: connectivityStatus,
   offlineIcon: Icons.cloud_off,
   onlineIcon: Icons.cloud_done,
@@ -91,8 +91,8 @@
   showMetrics: true,
   showButton: true,
   showStatus: true,
-)</code></pre><table><thead><tr><th>Prop</th><th>Type</th><th>Default</th></tr></thead><tbody><tr><td><code>statusStream</code></td><td><code>Stream&lt;String&gt;</code></td><td>required</td></tr><tr><td><code>onSync</code></td><td><code>VoidCallback</code></td><td>required</td></tr><tr><td><code>metrics</code></td><td><code>SyncSessionMetrics?</code></td><td>null</td></tr><tr><td><code>error</code></td><td><code>ReplicoreException?</code></td><td>null</td></tr><tr><td><code>onErrorDismiss</code></td><td><code>VoidCallback?</code></td><td>null</td></tr><tr><td><code>showMetrics</code></td><td><code>bool</code></td><td>true</td></tr><tr><td><code>showButton</code></td><td><code>bool</code></td><td>true</td></tr><tr><td><code>showStatus</code></td><td><code>bool</code></td><td>true</td></tr></tbody></table><div class="page-nav"><a href="realtime.html"><div class="label">← Previous</div><div class="title">Real-Time Sync</div></a><a href="multi-engine.html" class="next"><div class="label">Next →</div><div class="title">Multi-Engine</div></a></div>
-<div class="footer">Replicore v0.5.1 — Enterprise Local-First Sync for Flutter &middot; MIT License</div>
+)</code></pre><table><thead><tr><th>Prop</th><th>Type</th><th>Default</th></tr></thead><tbody><tr><td><code>statusStream</code></td><td><code>Stream&lt;String&gt;</code></td><td>required</td></tr><tr><td><code>onSync</code></td><td><code>VoidCallback</code></td><td>required</td></tr><tr><td><code>metrics</code></td><td><code>SyncSessionMetrics?</code></td><td>null</td></tr><tr><td><code>error</code></td><td><code>syncitronException?</code></td><td>null</td></tr><tr><td><code>onErrorDismiss</code></td><td><code>VoidCallback?</code></td><td>null</td></tr><tr><td><code>showMetrics</code></td><td><code>bool</code></td><td>true</td></tr><tr><td><code>showButton</code></td><td><code>bool</code></td><td>true</td></tr><tr><td><code>showStatus</code></td><td><code>bool</code></td><td>true</td></tr></tbody></table><div class="page-nav"><a href="realtime.html"><div class="label">← Previous</div><div class="title">Real-Time Sync</div></a><a href="multi-engine.html" class="next"><div class="label">Next →</div><div class="title">Multi-Engine</div></a></div>
+<div class="footer">syncitron v0.5.1 — Enterprise Local-First Sync for Flutter &middot; MIT License</div>
 </main>
 </div>
 </body></html>

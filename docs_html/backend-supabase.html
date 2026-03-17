@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Supabase Backend — Replicore Docs</title>
+<title>Supabase Backend — syncitron Docs</title>
 <link rel="stylesheet" href="assets/style.css">
 <script src="assets/app.js"></script>
 <script src="assets/search.js"></script>
@@ -10,7 +10,7 @@
 <body>
 <div class="topbar">
   <button class="hamburger" onclick="toggleSidebar()">☰</button>
-  <div class="logo">Replicore <span>v0.5.1 Docs</span></div>
+  <div class="logo">syncitron <span>v0.5.1 Docs</span></div>
   <div class="spacer"></div>
   <button class="search-trigger" onclick="openSearch()">🔍 Search <kbd>⌘K</kbd></button>
   <button id="theme-btn" onclick="toggleDark()">🌙 Dark</button>
@@ -58,10 +58,10 @@
 </nav>
 <main class="content">
 <h1>Supabase Backend</h1>
-<p style="opacity:.75;font-size:.9rem;margin-top:-.5rem">PostgreSQL via Supabase + real-time WebSocket sync</p><p><code>SupabaseAdapter</code> connects Replicore to a Supabase PostgreSQL backend. It supports cursor-based pagination, native batch upserts, and real-time subscriptions via WebSocket.</p><h2>Setup</h2><pre><code class="language-yaml">dependencies:
-  replicore: ^0.5.1
+<p style="opacity:.75;font-size:.9rem;margin-top:-.5rem">PostgreSQL via Supabase + real-time WebSocket sync</p><p><code>SupabaseAdapter</code> connects syncitron to a Supabase PostgreSQL backend. It supports cursor-based pagination, native batch upserts, and real-time subscriptions via WebSocket.</p><h2>Setup</h2><pre><code class="language-yaml">dependencies:
+  syncitron: ^0.5.1
   supabase_flutter: ^2.12.0
-  sqflite: ^2.4.2</code></pre><pre><code class="language-dart">import &#x27;package:replicore/replicore.dart&#x27;;
+  sqflite: ^2.4.2</code></pre><pre><code class="language-dart">import &#x27;package:syncitron/syncitron.dart&#x27;;
 import &#x27;package:supabase_flutter/supabase_flutter.dart&#x27;;
 
 final adapter = SupabaseAdapter(
@@ -70,11 +70,11 @@ final adapter = SupabaseAdapter(
   postgresChangeEventAll: PostgresChangeEvent.all,
   isAuthException: (e) =&gt; e is AuthException,
   updatedAtColumn: &#x27;updated_at&#x27;,  // default
-);</code></pre><h2>Required Database Schema</h2><p>Every table synced with Replicore must have these columns on Supabase:</p><pre><code class="language-sql">CREATE TABLE todos (
+);</code></pre><h2>Required Database Schema</h2><p>Every table synced with syncitron must have these columns on Supabase:</p><pre><code class="language-sql">CREATE TABLE todos (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   title TEXT NOT NULL,
   completed BOOLEAN DEFAULT false,
-  -- Required by Replicore:
+  -- Required by syncitron:
   updated_at TIMESTAMPTZ DEFAULT now(),
   deleted_at TIMESTAMPTZ NULL
 );
@@ -94,7 +94,7 @@ final manager = RealtimeSubscriptionManager(
 );
 
 await manager.initialize([&#x27;todos&#x27;, &#x27;projects&#x27;]);</code></pre><h2>Batch Operations</h2><p>SupabaseAdapter uses native PostgreSQL <code>UPSERT</code> for batch operations — true atomic writes for maximum throughput.</p><h2>Security</h2><ul><li>Enable <strong>Row-Level Security (RLS)</strong> on all synced tables</li><li>Handle session expiry: catch <code>SyncAuthException</code> and re-authenticate</li><li>Never log auth tokens — use <code>NoOpLogger</code> in production if needed</li></ul><div class="page-nav"><a href="metrics-logging.html"><div class="label">← Previous</div><div class="title">Metrics & Logging</div></a><a href="backend-firebase.html" class="next"><div class="label">Next →</div><div class="title">Firebase Firestore</div></a></div>
-<div class="footer">Replicore v0.5.1 — Enterprise Local-First Sync for Flutter &middot; MIT License</div>
+<div class="footer">syncitron v0.5.1 — Enterprise Local-First Sync for Flutter &middot; MIT License</div>
 </main>
 </div>
 </body></html>

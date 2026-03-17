@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>SQLite Storage (sqflite) — Replicore Docs</title>
+<title>SQLite Storage (sqflite) — syncitron Docs</title>
 <link rel="stylesheet" href="assets/style.css">
 <script src="assets/app.js"></script>
 <script src="assets/search.js"></script>
@@ -10,7 +10,7 @@
 <body>
 <div class="topbar">
   <button class="hamburger" onclick="toggleSidebar()">☰</button>
-  <div class="logo">Replicore <span>v0.5.1 Docs</span></div>
+  <div class="logo">syncitron <span>v0.5.1 Docs</span></div>
   <div class="spacer"></div>
   <button class="search-trigger" onclick="openSearch()">🔍 Search <kbd>⌘K</kbd></button>
   <button id="theme-btn" onclick="toggleDark()">🌙 Dark</button>
@@ -59,7 +59,7 @@
 <main class="content">
 <h1>SQLite Storage (sqflite)</h1>
 <p style="opacity:.75;font-size:.9rem;margin-top:-.5rem">Recommended — production-proven SQLite storage</p><p><code>SqfliteStore</code> is the recommended local store. Battle-tested, suitable for 100K+ records, lowest memory footprint.</p><h2>Setup</h2><pre><code class="language-dart">import &#x27;package:sqflite/sqflite.dart&#x27;;
-import &#x27;package:replicore/replicore.dart&#x27;;
+import &#x27;package:syncitron/syncitron.dart&#x27;;
 
 final db = await openDatabase(&#x27;myapp.db&#x27;, version: 1, onCreate: (db, v) async {
   await db.execute(&#x27;CREATE TABLE todos (id TEXT PRIMARY KEY, title TEXT, ...)&#x27;);
@@ -70,8 +70,8 @@ final store = SqfliteStore(
   conflictAlgorithm: ConflictAlgorithm.replace, // required
   isSyncedColumn: &#x27;is_synced&#x27;,      // default
   operationIdColumn: &#x27;op_id&#x27;,       // default
-);</code></pre><h2>Automatic Column Migration</h2><p><code>ensureSyncColumns()</code> (called during <code>engine.init()</code>) checks if <code>is_synced</code> and <code>op_id</code> columns exist and adds them via <code>ALTER TABLE</code> if missing.</p><h2>Cursor Persistence</h2><p>Sync cursors are stored in a private <code>_replicore_meta</code> table, created automatically. This table maps table names to their last-synced <code>updated_at</code> + <code>primaryKey</code> pair.</p><h2>Batch Optimisations</h2><ul><li>SQL parameter chunking: batches are split into chunks of 999 parameters to respect SQLite's <code>SQLITE_MAX_VARIABLE_NUMBER</code> limit.</li><li><code>markManyAsSynced()</code> uses <code>UPDATE … WHERE pk IN (...)</code> instead of N individual updates.</li><li><code>upsertBatch()</code> uses <code>INSERT OR REPLACE</code> inside a single transaction.</li></ul><div class="page-nav"><a href="backend-graphql.html"><div class="label">← Previous</div><div class="title">GraphQL</div></a><a href="storage-drift.html" class="next"><div class="label">Next →</div><div class="title">Drift</div></a></div>
-<div class="footer">Replicore v0.5.1 — Enterprise Local-First Sync for Flutter &middot; MIT License</div>
+);</code></pre><h2>Automatic Column Migration</h2><p><code>ensureSyncColumns()</code> (called during <code>engine.init()</code>) checks if <code>is_synced</code> and <code>op_id</code> columns exist and adds them via <code>ALTER TABLE</code> if missing.</p><h2>Cursor Persistence</h2><p>Sync cursors are stored in a private <code>_syncitron_meta</code> table, created automatically. This table maps table names to their last-synced <code>updated_at</code> + <code>primaryKey</code> pair.</p><h2>Batch Optimisations</h2><ul><li>SQL parameter chunking: batches are split into chunks of 999 parameters to respect SQLite's <code>SQLITE_MAX_VARIABLE_NUMBER</code> limit.</li><li><code>markManyAsSynced()</code> uses <code>UPDATE … WHERE pk IN (...)</code> instead of N individual updates.</li><li><code>upsertBatch()</code> uses <code>INSERT OR REPLACE</code> inside a single transaction.</li></ul><div class="page-nav"><a href="backend-graphql.html"><div class="label">← Previous</div><div class="title">GraphQL</div></a><a href="storage-drift.html" class="next"><div class="label">Next →</div><div class="title">Drift</div></a></div>
+<div class="footer">syncitron v0.5.1 — Enterprise Local-First Sync for Flutter &middot; MIT License</div>
 </main>
 </div>
 </body></html>

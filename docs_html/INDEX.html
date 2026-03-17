@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Replicore Documentation — Replicore Docs</title>
+<title>syncitron Documentation — syncitron Docs</title>
 <link rel="stylesheet" href="assets/style.css">
 <script src="assets/app.js"></script>
 <script src="assets/search.js"></script>
@@ -10,7 +10,7 @@
 <body>
 <div class="topbar">
   <button class="hamburger" onclick="toggleSidebar()">☰</button>
-  <div class="logo">Replicore <span>v0.5.1 Docs</span></div>
+  <div class="logo">syncitron <span>v0.5.1 Docs</span></div>
   <div class="spacer"></div>
   <button class="search-trigger" onclick="openSearch()">🔍 Search <kbd>⌘K</kbd></button>
   <button id="theme-btn" onclick="toggleDark()">🌙 Dark</button>
@@ -57,8 +57,8 @@
 <a href="changelog.html"><span class="icon">📋</span>Changelog</a>
 </nav>
 <main class="content">
-<h1>Replicore Documentation</h1>
-<p style="font-size:1.15rem;color:var(--c-text-muted);margin-bottom:2rem">Enterprise-grade local-first synchronization framework for Flutter.<br>Build offline-capable apps with automatic sync, conflict resolution, and comprehensive monitoring.</p><div class="feature-grid"><div class="feature"><div class="emoji">🔌</div><h4>Pluggable Backends</h4><p>Supabase, Firebase, Appwrite, or any GraphQL server</p></div><div class="feature"><div class="emoji">📱</div><h4>True Offline-First</h4><p>Full functionality offline, seamless sync when connected</p></div><div class="feature"><div class="emoji">🧠</div><h4>Smart Conflicts</h4><p>ServerWins, LocalWins, LastWriteWins, or Custom strategies</p></div><div class="feature"><div class="emoji">⚡</div><h4>Batch Operations</h4><p>50-100× faster syncs — eliminates the N+1 problem</p></div><div class="feature"><div class="emoji">📊</div><h4>Observability</h4><p>Structured logging, metrics, and health checks</p></div><div class="feature"><div class="emoji">🛡️</div><h4>Error Recovery</h4><p>Sealed exception hierarchy with retry and backoff</p></div><div class="feature"><div class="emoji">🎨</div><h4>Ready-made Widgets</h4><p>6 Flutter widgets for sync status, errors, and metrics</p></div><div class="feature"><div class="emoji">📡</div><h4>Real-Time</h4><p>Event-driven sync with all four backends</p></div></div><h2>Quick Install</h2><pre><code class="language-bash">flutter pub add replicore</code></pre><h2>Minimal Example</h2><pre><code class="language-dart">import &#x27;package:replicore/replicore.dart&#x27;;
+<h1>syncitron Documentation</h1>
+<p style="font-size:1.15rem;color:var(--c-text-muted);margin-bottom:2rem">Enterprise-grade local-first synchronization framework for Flutter.<br>Build offline-capable apps with automatic sync, conflict resolution, and comprehensive monitoring.</p><div class="feature-grid"><div class="feature"><div class="emoji">🔌</div><h4>Pluggable Backends</h4><p>Supabase, Firebase, Appwrite, or any GraphQL server</p></div><div class="feature"><div class="emoji">📱</div><h4>True Offline-First</h4><p>Full functionality offline, seamless sync when connected</p></div><div class="feature"><div class="emoji">🧠</div><h4>Smart Conflicts</h4><p>ServerWins, LocalWins, LastWriteWins, or Custom strategies</p></div><div class="feature"><div class="emoji">⚡</div><h4>Batch Operations</h4><p>50-100× faster syncs — eliminates the N+1 problem</p></div><div class="feature"><div class="emoji">📊</div><h4>Observability</h4><p>Structured logging, metrics, and health checks</p></div><div class="feature"><div class="emoji">🛡️</div><h4>Error Recovery</h4><p>Sealed exception hierarchy with retry and backoff</p></div><div class="feature"><div class="emoji">🎨</div><h4>Ready-made Widgets</h4><p>6 Flutter widgets for sync status, errors, and metrics</p></div><div class="feature"><div class="emoji">📡</div><h4>Real-Time</h4><p>Event-driven sync with all four backends</p></div></div><h2>Quick Install</h2><pre><code class="language-bash">flutter pub add syncitron</code></pre><h2>Minimal Example</h2><pre><code class="language-dart">import &#x27;package:syncitron/syncitron.dart&#x27;;
 import &#x27;package:sqflite/sqflite.dart&#x27;;
 import &#x27;package:supabase_flutter/supabase_flutter.dart&#x27;;
 
@@ -69,7 +69,7 @@ final engine = SyncEngine(
     localStore: sqfliteStore,
     postgresChangeEventAll: PostgresChangeEvent.all,
   ),
-  config:        ReplicoreConfig.production(),
+  config:        syncitronConfig.production(),
   logger:        ConsoleLogger(),
 );
 
@@ -81,8 +81,8 @@ engine.registerTable(TableConfig(
 
 await engine.init();
 final metrics = await engine.syncAll();
-print(metrics.overallSuccess); // true</code></pre><h2>Documentation Map</h2><table><thead><tr><th>Section</th><th>Contents</th></tr></thead><tbody><tr><td><a href='getting-started.html'>Quick Start</a></td><td>Install, configure, sync in 5 minutes</td></tr><tr><td><a href='architecture.html'>Architecture</a></td><td>Engine, stores, adapters, data flow</td></tr><tr><td><a href='sync-engine.html'>Sync Engine</a></td><td>Core API: init, syncAll, syncTable, registerTable</td></tr><tr><td><a href='sync-conflicts.html'>Conflict Resolution</a></td><td>4 strategies with examples</td></tr><tr><td><a href='configuration.html'>Configuration</a></td><td>ReplicoreConfig presets and custom tuning</td></tr><tr><td><a href='error-handling.html'>Error Handling</a></td><td>Sealed exception hierarchy</td></tr><tr><td><a href='metrics-logging.html'>Metrics &amp; Logging</a></td><td>SyncMetrics, Loggers, MetricsCollector</td></tr><tr><td>Backends</td><td><a href='backend-supabase.html'>Supabase</a> · <a href='backend-firebase.html'>Firebase</a> · <a href='backend-appwrite.html'>Appwrite</a> · <a href='backend-graphql.html'>GraphQL</a></td></tr><tr><td>Storage</td><td><a href='storage-sqflite.html'>SQLite</a> · <a href='storage-drift.html'>Drift</a> · <a href='storage-hive.html'>Hive</a> · <a href='storage-isar.html'>Isar</a></td></tr><tr><td><a href='orchestration.html'>Orchestration</a></td><td>5 built-in sync strategies for advanced flows</td></tr><tr><td><a href='realtime.html'>Real-Time</a></td><td>Event-driven sync with auto-reconnect</td></tr><tr><td><a href='widgets.html'>UI Widgets</a></td><td>6 ready-made Flutter widgets</td></tr><tr><td><a href='api-reference.html'>API Reference</a></td><td>Complete class/method reference</td></tr></tbody></table><div class="page-nav"><span></span><a href="getting-started.html" class="next"><div class="label">Next →</div><div class="title">Quick Start</div></a></div>
-<div class="footer">Replicore v0.5.1 — Enterprise Local-First Sync for Flutter &middot; MIT License</div>
+print(metrics.overallSuccess); // true</code></pre><h2>Documentation Map</h2><table><thead><tr><th>Section</th><th>Contents</th></tr></thead><tbody><tr><td><a href='getting-started.html'>Quick Start</a></td><td>Install, configure, sync in 5 minutes</td></tr><tr><td><a href='architecture.html'>Architecture</a></td><td>Engine, stores, adapters, data flow</td></tr><tr><td><a href='sync-engine.html'>Sync Engine</a></td><td>Core API: init, syncAll, syncTable, registerTable</td></tr><tr><td><a href='sync-conflicts.html'>Conflict Resolution</a></td><td>4 strategies with examples</td></tr><tr><td><a href='configuration.html'>Configuration</a></td><td>syncitronConfig presets and custom tuning</td></tr><tr><td><a href='error-handling.html'>Error Handling</a></td><td>Sealed exception hierarchy</td></tr><tr><td><a href='metrics-logging.html'>Metrics &amp; Logging</a></td><td>SyncMetrics, Loggers, MetricsCollector</td></tr><tr><td>Backends</td><td><a href='backend-supabase.html'>Supabase</a> · <a href='backend-firebase.html'>Firebase</a> · <a href='backend-appwrite.html'>Appwrite</a> · <a href='backend-graphql.html'>GraphQL</a></td></tr><tr><td>Storage</td><td><a href='storage-sqflite.html'>SQLite</a> · <a href='storage-drift.html'>Drift</a> · <a href='storage-hive.html'>Hive</a> · <a href='storage-isar.html'>Isar</a></td></tr><tr><td><a href='orchestration.html'>Orchestration</a></td><td>5 built-in sync strategies for advanced flows</td></tr><tr><td><a href='realtime.html'>Real-Time</a></td><td>Event-driven sync with auto-reconnect</td></tr><tr><td><a href='widgets.html'>UI Widgets</a></td><td>6 ready-made Flutter widgets</td></tr><tr><td><a href='api-reference.html'>API Reference</a></td><td>Complete class/method reference</td></tr></tbody></table><div class="page-nav"><span></span><a href="getting-started.html" class="next"><div class="label">Next →</div><div class="title">Quick Start</div></a></div>
+<div class="footer">syncitron v0.5.1 — Enterprise Local-First Sync for Flutter &middot; MIT License</div>
 </main>
 </div>
 </body></html>

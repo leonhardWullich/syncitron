@@ -6,7 +6,7 @@ import 'local_store.dart';
 
 /// SQLite implementation of [LocalStore] backed by `sqflite`.
 ///
-/// Sync cursors are stored in a dedicated `_replicore_meta` table that is
+/// Sync cursors are stored in a dedicated `_syncitron_meta` table that is
 /// created automatically on first use. This guarantees that cursor data is
 /// evicted only when the SQLite database itself is deleted — never when the
 /// user clears app cache or the OS purges SharedPreferences / NSUserDefaults.
@@ -22,7 +22,7 @@ import 'local_store.dart';
 /// ```
 class SqfliteStore implements LocalStore {
   /// The sqflite [Database] instance. Accepts `dynamic` so that
-  /// `package:sqflite` does not need to be a direct dependency of Replicore.
+  /// `package:sqflite` does not need to be a direct dependency of syncitron.
   final dynamic db;
 
   final String isSyncedColumn;
@@ -33,7 +33,7 @@ class SqfliteStore implements LocalStore {
   final dynamic conflictAlgorithm;
 
   /// Name of the internal meta-table used to persist sync cursors.
-  static const _metaTable = '_replicore_meta';
+  static const _metaTable = '_syncitron_meta';
 
   SqfliteStore(
     this.db, {
@@ -44,7 +44,7 @@ class SqfliteStore implements LocalStore {
 
   // ── Schema management ──────────────────────────────────────────────────────
 
-  /// Ensures the internal `_replicore_meta` table exists.
+  /// Ensures the internal `_syncitron_meta` table exists.
   /// Called lazily before any cursor read/write.
   Future<void> _ensureMetaTable() async {
     await db.execute('''

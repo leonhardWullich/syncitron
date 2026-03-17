@@ -1,8 +1,8 @@
-/* Replicore Docs — Shared JavaScript */
+/* syncitron Docs — Shared JavaScript */
 
 // --- Dark mode ---
 (function(){
-  const key='replicore-dark';
+  const key='syncitron-dark';
   const saved=localStorage.getItem(key);
   if(saved==='true') document.body.classList.add('dark');
 

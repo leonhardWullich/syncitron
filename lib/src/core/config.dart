@@ -1,11 +1,11 @@
-/// Configuration for the Replicore sync engine.
+/// Configuration for the syncitron sync engine.
 ///
 /// All parameters have sensible enterprise defaults:
 /// - Automatic retry with exponential backoff
 /// - Comprehensive logging
 /// - Metrics collection
 /// - Graceful degradation on network errors
-class ReplicoreConfig {
+class syncitronConfig {
   /// Maximum number of records to fetch in a single batch.
   final int batchSize;
 
@@ -45,7 +45,7 @@ class ReplicoreConfig {
   /// Enable validation of configuration on creation.
   final bool validateOnCreation;
 
-  const ReplicoreConfig({
+  const syncitronConfig({
     this.batchSize = 500,
     this.maxConcurrentSyncs = 1,
     this.operationTimeout = const Duration(seconds: 30),
@@ -62,8 +62,8 @@ class ReplicoreConfig {
   });
 
   /// Create a production-grade configuration.
-  factory ReplicoreConfig.production() {
-    return ReplicoreConfig(
+  factory syncitronConfig.production() {
+    return syncitronConfig(
       batchSize: 1000,
       maxRetries: 5,
       initialRetryDelay: const Duration(seconds: 1),
@@ -75,8 +75,8 @@ class ReplicoreConfig {
   }
 
   /// Create a development configuration with verbose logging.
-  factory ReplicoreConfig.development() {
-    return ReplicoreConfig(
+  factory syncitronConfig.development() {
+    return syncitronConfig(
       batchSize: 100,
       maxRetries: 2,
       enableDetailedLogging: true,
@@ -86,8 +86,8 @@ class ReplicoreConfig {
   }
 
   /// Create a configuration for testing.
-  factory ReplicoreConfig.testing() {
-    return ReplicoreConfig(
+  factory syncitronConfig.testing() {
+    return syncitronConfig(
       batchSize: 50,
       maxRetries: 1,
       enableDetailedLogging: false,
@@ -132,7 +132,7 @@ class ReplicoreConfig {
   }
 
   /// Create a copy with some fields overridden.
-  ReplicoreConfig copyWith({
+  syncitronConfig copyWith({
     int? batchSize,
     int? maxConcurrentSyncs,
     Duration? operationTimeout,
@@ -147,7 +147,7 @@ class ReplicoreConfig {
     bool? collectMetrics,
     bool? validateOnCreation,
   }) {
-    return ReplicoreConfig(
+    return syncitronConfig(
       batchSize: batchSize ?? this.batchSize,
       maxConcurrentSyncs: maxConcurrentSyncs ?? this.maxConcurrentSyncs,
       operationTimeout: operationTimeout ?? this.operationTimeout,

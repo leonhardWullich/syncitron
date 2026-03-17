@@ -1,6 +1,6 @@
-/// Base class for all exceptions thrown by the Replicore framework.
+/// Base class for all exceptions thrown by the syncitron framework.
 ///
-/// Catching [ReplicoreException] is sufficient to handle any framework error.
+/// Catching [syncitronException] is sufficient to handle any framework error.
 /// Catch the subclasses for more targeted error handling in the UI.
 ///
 /// ```dart
@@ -10,17 +10,17 @@
 ///   showBanner('You appear to be offline.');
 /// } on SchemaMigrationException catch (e) {
 ///   showBanner('Database schema error: ${e.table}');
-/// } on ReplicoreException catch (e) {
+/// } on syncitronException catch (e) {
 ///   showBanner('Sync error: ${e.message}');
 /// }
 /// ```
-sealed class ReplicoreException implements Exception {
+sealed class syncitronException implements Exception {
   final String message;
 
   /// The underlying error that caused this exception, if any.
   final Object? cause;
 
-  const ReplicoreException(this.message, {this.cause});
+  const syncitronException(this.message, {this.cause});
 
   @override
   String toString() {
@@ -40,7 +40,7 @@ sealed class ReplicoreException implements Exception {
 ///   if (e.isOffline) showOfflineBanner();
 /// }
 /// ```
-class SyncNetworkException extends ReplicoreException {
+class SyncNetworkException extends syncitronException {
   /// The table that was being synced when the error occurred.
   final String table;
 
@@ -62,7 +62,7 @@ class SyncNetworkException extends ReplicoreException {
 /// Thrown when the remote adapter signals that the request is unauthorized.
 ///
 /// Usually means the user's session has expired.
-class SyncAuthException extends ReplicoreException {
+class SyncAuthException extends syncitronException {
   /// The table that was being synced when the error occurred.
   final String table;
 
@@ -78,7 +78,7 @@ class SyncAuthException extends ReplicoreException {
 /// Thrown when a [SyncStrategy.custom] resolver throws an unhandled error.
 ///
 /// The original resolver exception is available via [cause].
-class ConflictResolutionException extends ReplicoreException {
+class ConflictResolutionException extends syncitronException {
   /// The table in which the conflict occurred.
   final String table;
 
@@ -99,7 +99,7 @@ class ConflictResolutionException extends ReplicoreException {
 ///
 /// This typically means the database is locked, or the schema is in an
 /// unexpected state. Check [table] and [column] for details.
-class SchemaMigrationException extends ReplicoreException {
+class SchemaMigrationException extends syncitronException {
   /// The table on which migration was attempted.
   final String table;
 
@@ -115,7 +115,7 @@ class SchemaMigrationException extends ReplicoreException {
 }
 
 /// Thrown when a batch upsert to the local SQLite store fails.
-class LocalStoreException extends ReplicoreException {
+class LocalStoreException extends syncitronException {
   /// The table on which the write failed.
   final String table;
 
@@ -130,7 +130,7 @@ class LocalStoreException extends ReplicoreException {
 
 /// Thrown when [SyncEngine.syncTable] is called with a table name that was
 /// not registered via [SyncEngine.registerTable].
-class UnregisteredTableException extends ReplicoreException {
+class UnregisteredTableException extends syncitronException {
   final String table;
 
   const UnregisteredTableException(this.table)
@@ -140,6 +140,6 @@ class UnregisteredTableException extends ReplicoreException {
 /// Thrown when [SyncEngine] is used before [SyncEngine.init] has completed,
 /// or when configuration is invalid (e.g. [SyncStrategy.custom] without a
 /// [ConflictResolver]).
-class EngineConfigurationException extends ReplicoreException {
+class EngineConfigurationException extends syncitronException {
   const EngineConfigurationException(String message) : super(message);
 }

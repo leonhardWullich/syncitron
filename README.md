@@ -1,18 +1,18 @@
-# Replicore - Enterprise Local-First Sync for Flutter
+# syncitron - Enterprise Local-First Sync for Flutter
 
-![Replicore Logo](replicore_logo.jpeg)
+![syncitron Logo](syncitron_logo.jpeg)
 
 > **Production-ready synchronization engine for offline-capable Flutter applications.**
 
-Transform your online-only Supabase/REST API app into a robust **offline-first platform**. Replicore handles the complexity of bidirectional data synchronization, conflict resolution, incremental syncing, and comprehensive error recovery—so you can focus on building great user experiences.
+Transform your online-only Supabase/REST API app into a robust **offline-first platform**. syncitron handles the complexity of bidirectional data synchronization, conflict resolution, incremental syncing, and comprehensive error recovery—so you can focus on building great user experiences.
 
-[![Pub.dev Badge](https://img.shields.io/pub/v/replicore.svg)](https://pub.dev/packages/replicore)
+[![Pub.dev Badge](https://img.shields.io/pub/v/syncitron.svg)](https://pub.dev/packages/syncitron)
 [![License Badge](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Flutter Badge](https://img.shields.io/badge/flutter-approved-5ac8fa.svg)](https://flutter.dev)
 
 ---
 
-## 🎯 Why Replicore?
+## 🎯 Why syncitron?
 
 Building offline-capable apps is **hard**. Developers struggle with:
 
@@ -22,7 +22,7 @@ Building offline-capable apps is **hard**. Developers struggle with:
 - ❌ **Monitoring**: Understanding what's happening during sync
 - ❌ **Production Readiness**: Error handling, logging, and recovery strategies
 
-**Replicore solves all of this** with a battle-tested, enterprise-grade framework.
+**syncitron solves all of this** with a battle-tested, enterprise-grade framework.
 
 ---
 
@@ -121,14 +121,14 @@ Visit [docs/INDEX.md](docs/INDEX.md) for:
 Add to your `pubspec.yaml`:
 
 ```bash
-flutter pub add replicore
+flutter pub add syncitron
 ```
 
 Or manually:
 
 ```yaml
 dependencies:
-  replicore: ^0.5.0
+  syncitron: ^0.5.0
   sqflite: ^2.4.2
   supabase_flutter: ^2.12.0
 ```
@@ -137,7 +137,7 @@ For other backends, add only what you need:
 
 ```yaml
 dependencies:
-  replicore: ^0.5.0
+  syncitron: ^0.5.0
   
   # LocalStores (pick one)
   drift: ^2.14.0          # For type-safe SQL
@@ -160,7 +160,7 @@ dependencies:
 ```dart
 import 'package:flutter/material.dart';
 import 'package:path/path.dart';
-import 'package:replicore/replicore.dart';
+import 'package:syncitron/syncitron.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -177,7 +177,7 @@ Future<void> main() async {
 }
 ```
 
-### 2️⃣ Initialize Replicore
+### 2️⃣ Initialize syncitron
 
 ```dart
 void main() async {
@@ -214,7 +214,7 @@ void main() async {
   final engine = SyncEngine(
     localStore: localStore,
     remoteAdapter: remoteAdapter,
-    config: ReplicoreConfig.production(),
+    config: syncitronConfig.production(),
     logger: ConsoleLogger(minLevel: LogLevel.info),
   );
 
@@ -282,7 +282,7 @@ class TodosScreen extends StatelessWidget {
 
 ## 🎨 Out-of-the-Box UI Components
 
-Don't reinvent the wheel! Replicore comes with a suite of production-ready, highly customizable Flutter widgets to handle complex sync states, network errors, and offline indicators effortlessly.
+Don't reinvent the wheel! syncitron comes with a suite of production-ready, highly customizable Flutter widgets to handle complex sync states, network errors, and offline indicators effortlessly.
 
 ### Available Widgets
 
@@ -328,7 +328,7 @@ Context-aware error banner that automatically handles different error types.
 
 ```dart
 SyncErrorBanner(
-  error: syncError, // ReplicoreException?
+  error: syncError, // syncitronException?
   onRetry: () => engine.syncAll(),
   onDismiss: () => setState(() => syncError = null),
 )
@@ -349,7 +349,7 @@ SyncStatusPanel(
   statusStream: engine.statusStream,
   onSync: () => engine.syncAll(),
   metrics: lastSessionMetrics, // SyncSessionMetrics?
-  error: currentError, // ReplicoreException?
+  error: currentError, // syncitronException?
   onErrorDismiss: () => setState(() => currentError = null),
   showMetrics: true,
   showButton: true,
@@ -410,7 +410,7 @@ SyncButton(
 
 ```dart
 import 'package:flutter/material.dart';
-import 'package:replicore/replicore.dart';
+import 'package:syncitron/syncitron.dart';
 
 class SyncDashboard extends StatefulWidget {
   final SyncEngine engine;
@@ -423,7 +423,7 @@ class SyncDashboard extends StatefulWidget {
 
 class _SyncDashboardState extends State<SyncDashboard> {
   SyncSessionMetrics? _lastMetrics;
-  ReplicoreException? _lastError;
+  syncitronException? _lastError;
 
   Future<void> _sync() async {
     try {
@@ -432,7 +432,7 @@ class _SyncDashboardState extends State<SyncDashboard> {
         _lastMetrics = metrics;
         _lastError = null;
       });
-    } on ReplicoreException catch (e) {
+    } on syncitronException catch (e) {
       setState(() => _lastError = e);
     }
   }
@@ -545,7 +545,7 @@ SyncErrorBanner(
 ### Recommended: Production Config
 
 ```dart
-final config = ReplicoreConfig.production();
+final config = syncitronConfig.production();
 // ✓ Large batches (1000 records)
 // ✓ Aggressive retries (5 attempts)
 // ✓ Longer backoff (up to 5 minutes)
@@ -556,7 +556,7 @@ final config = ReplicoreConfig.production();
 ### Development Config
 
 ```dart
-final config = ReplicoreConfig.development();
+final config = syncitronConfig.development();
 // ✓ Small batches (100 records)
 // ✓ Few retries (2 attempts)
 // ✓ Detailed logging enabled
@@ -566,7 +566,7 @@ final config = ReplicoreConfig.development();
 ### Testing Config
 
 ```dart
-final config = ReplicoreConfig.testing();
+final config = syncitronConfig.testing();
 // ✓ Minimal overhead
 // ✓ No logging
 // ✓ No metrics
@@ -575,7 +575,7 @@ final config = ReplicoreConfig.testing();
 ### Custom Config
 
 ```dart
-final config = ReplicoreConfig(
+final config = syncitronConfig(
   batchSize: 500,
   maxRetries: 3,
   initialRetryDelay: Duration(seconds: 1),
@@ -589,7 +589,7 @@ final config = ReplicoreConfig(
 
 ## 🧬 Conflict Resolution
 
-When a record is modified locally and remotely, Replicore must decide which version to keep.
+When a record is modified locally and remotely, syncitron must decide which version to keep.
 
 ### ServerWins (Default)
 Remote always wins. Local changes discarded.
@@ -720,8 +720,8 @@ try {
 } on LocalStoreException catch (e) {
   // Local database error
   showMessage('Database error: ${e.message}');
-} on ReplicoreException catch (e) {
-  // Catch-all for any Replicore error
+} on syncitronException catch (e) {
+  // Catch-all for any syncitron error
   showMessage('Sync error: ${e.message}');
 }
 ```
@@ -741,7 +741,7 @@ CREATE TABLE todos (
   title TEXT NOT NULL,
   completed BOOLEAN DEFAULT false,
   
-  -- Required by Replicore
+  -- Required by syncitron
   updated_at TIMESTAMP DEFAULT now(),
   deleted_at TIMESTAMP NULL
 );
@@ -752,7 +752,7 @@ CREATE INDEX idx_todos_updated_at ON todos(updated_at);
 
 ### Local SQLite Columns
 
-Replicore automatically adds:
+syncitron automatically adds:
 - `is_synced` (INTEGER) - Tracks sync status
 - `op_id` (TEXT) - Operation ID for idempotency
 
@@ -841,7 +841,7 @@ FloatingActionButton(
 
 ## � Real-Time Synchronization
 
-Replicore includes automatic real-time sync when data changes on the remote backend. Enable it when initializing the engine:
+syncitron includes automatic real-time sync when data changes on the remote backend. Enable it when initializing the engine:
 
 ```dart
 final manager = RealtimeSubscriptionManager(
@@ -911,7 +911,7 @@ await manager.close();
 
 ## � Complete Documentation Suite
 
-Replicore comes with comprehensive **27 guides** covering everything you need to master offline-first sync:
+syncitron comes with comprehensive **27 guides** covering everything you need to master offline-first sync:
 
 ### 🚀 Quick Navigation
 - **Starting out?** → [Getting Started (30 min)](docs/01_GETTING_STARTED.md)
@@ -970,13 +970,13 @@ MIT - See [LICENSE](LICENSE) for details.
 ## 🆘 Support & Contact
 
 - **Examples**: [example/](example/) directory
-- **Issues**: [GitHub Issues](https://github.com/leonhardWullich/replicore/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/leonhardWullich/replicore/discussions)
+- **Issues**: [GitHub Issues](https://github.com/leonhardWullich/syncitron/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/leonhardWullich/syncitron/discussions)
 
 ---
 
 **Built for teams who demand reliability, observability, and performance. 🚀**
 
-*Replicore v0.5.1 - Enterprise-ready local-first sync for Flutter with 50-100x batch operations*
+*syncitron v0.5.1 - Enterprise-ready local-first sync for Flutter with 50-100x batch operations*
 
 [→ Explore the complete documentation](docs/INDEX.md)
